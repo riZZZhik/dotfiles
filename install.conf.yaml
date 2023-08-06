@@ -1,0 +1,21 @@
+- defaults:
+    link:
+      glob: true
+      create: true
+      relink: true
+      force: true
+    shell:
+      stdin: true
+      stdout: true
+      stderr: true
+
+- clean: ["~"]
+
+- link:
+    ~/:
+      path: home/.*
+
+- create:
+    ~/.ssh:
+      mode: 0700
+    ~/Desktop/dev:
