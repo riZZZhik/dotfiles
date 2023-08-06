@@ -87,6 +87,9 @@ install_software() {
     error "Error: Brew is not available"
   fi
 
+  # Colorls
+  gem install colorls
+
   finish
 }
 
@@ -96,6 +99,7 @@ install_python() {
 
     if [ "$(uname)" = "Darwin" ]; then
       brew install python@3.11
+      brew link --overwirte python@3.11
     elif [ "$(uname)" = "Linux" ]; then
       sudo apt install wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
       sudo add-apt-repository ppa:deadsnakes/ppa
@@ -117,7 +121,7 @@ install_python() {
 
   echo "Installing: ${packages[*]}"
 
-  python3 -m pip install --upgrade "${packages[@]}"
+  python3.11 -m pip install --upgrade "${packages[@]}"
 
   finish
 }

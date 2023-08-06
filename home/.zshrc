@@ -35,7 +35,6 @@ _extend_path() {
 # Add custom bin to $PATH
 _extend_path "/opt/homebrew/bin"
 _extend_path "$HOME/.local/bin"
-_extend_path "$(brew --prefix)/opt/python@3.11/libexec/bin"
 
 # ------------------------------------------------------------------------------
 # Plugins
@@ -72,10 +71,13 @@ _source ~/.p10k.zsh
 # Setup fzf
 _source ~/.fzf.zsh
 
+# Setup thefuck
+eval $(thefuck --alias)
+
 # Export secrets for MTS AI
 _source ~/.secrets_mts.sh
 
-# Color ls  (https://github.com/athityakumar/colorls)
+# Color ls (https://github.com/athityakumar/colorls)
 _source $(dirname $(gem which colorls))/tab_complete.sh
 alias ls='colorls --almost-all --dark --gs'
 alias ll='colorls --almost-all --dark --gs --long'
