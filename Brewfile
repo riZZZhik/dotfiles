@@ -52,6 +52,7 @@ cask "font-fira-code-nerd-font"
 
 # Utils
 cask "gpg-suite"
+cask "logi-options-plus"
 cask "openvpn-connect"
 cask "raycast"
 
