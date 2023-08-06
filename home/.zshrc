@@ -50,6 +50,7 @@ plugins=(
   gpg-agent
   macos
   docker
+  git
   command-not-found
 )
 
