@@ -14,6 +14,7 @@ brew "python@3.11"
 brew "ruby"
 brew "sheldon"
 brew "thefuck"
+brew "trash-cli"
 brew "tldr"  # https://tldr.sh
 brew "terminal-notifier"
 brew "tmux"

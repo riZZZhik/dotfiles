@@ -79,20 +79,9 @@ _source ~/.secrets_mts.sh
 
 # Color ls (https://github.com/athityakumar/colorls)
 _source $(dirname $(gem which colorls))/tab_complete.sh
-alias ls='colorls --almost-all --dark --gs'
-alias ll='colorls --almost-all --dark --gs --long'
-alias tree='colorls --tree --dark'
 
-# ------------------------------------------------------------------------------
-# User aliases
-# ------------------------------------------------------------------------------
-
-alias c="clear"
-alias -g G="| grep"
-alias dev="cd ~/Desktop/dev"
-function mkcd {
-  command mkdir $1 && cd $1
-}
+# Export custom aliases
+_source ~/.aliases.zsh
 
 # ------------------------------------------------------------------------------
 
