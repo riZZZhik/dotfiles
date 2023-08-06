@@ -58,7 +58,31 @@ update_linux() {
   finish
 }
 
+install_clt() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return
+  fi
+
+  info "Trying to detect installed Command Line Tools for Xcode..."
+
+  xcode-select -p &> /dev/null
+  if [ $? -ne 0 ]; then
+    info "Installing Command Line Tools for Xcode..."
+    touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress;
+    PROD=$(softwareupdate -l | grep "\*.*Command Line" | tail -n 1 | sed 's/^[^C]* //')
+    softwareupdate -i "$PROD" --verbose;
+  else
+    success "You already have Command Line Tools for Xcode installed. Skipping..."
+  fi
+
+  finish
+}
+
 install_homebrew() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return
+  fi
+
   info "Trying to detect installed Homebrew..."
 
   if ! _exists brew; then
@@ -74,6 +98,8 @@ install_homebrew() {
 
 install_software() {
   if [ "$(uname)" != "Darwin" ]; then
+    echo "Installing software is only supported for macos."
+    echo "You can manually download software. It is listed in ${BOLD}Brewfile${RESET}."
     return
   fi
 
