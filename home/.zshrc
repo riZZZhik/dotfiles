@@ -13,7 +13,7 @@ fi
 # ------------------------------------------------------------------------------
 
 # User settings
-export EDITOR="code"
+export EDITOR="nvim"
 
 # Locale
 export LC_ALL=en_US.UTF-8
