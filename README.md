@@ -4,7 +4,7 @@
 
 ```bash
 # Clone dotfiles repo
-git clone https://github.com/denysdovhan/dotfiles.git $HOME/.dotfiles
+git clone https://github.com/riZZZhik/dotfiles.git $HOME/.dotfiles
 
 # Go to the dotfiles directory
 cd $HOME/.dotfiles
