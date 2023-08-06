@@ -19,3 +19,15 @@
     ~/.ssh:
       mode: 0700
     ~/Desktop/dev:
+
+- shell:
+    - description: Update packet managers
+      command: source ./installers.sh && update_linux && install_homebrew
+
+    - description: Install software
+      command: source ./installers.sh && install_software
+
+    - description: Install python
+      command: source ./installers.sh && install_python
+
+    - source ./installers.sh && on_finish
