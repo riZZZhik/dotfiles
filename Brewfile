@@ -42,6 +42,7 @@ cask "telegram"
 
 # Development
 cask "fig"
+cask "jetbrains-toolbox"
 cask "iterm2"
 cask "netron"
 cask "visual-studio-code"
@@ -52,10 +53,13 @@ cask "font-fira-code"
 cask "font-fira-code-nerd-font"
 
 # Utils
+cask "cheatsheet"
 cask "gpg-suite"
+cask "karabiner-elements"
 cask "logi-options-plus"
 cask "openvpn-connect"
 cask "raycast"
+cask "vivid"
 
 # Quick Look plugins
 cask "qlcolorcode" # https://github.com/anthonygelibert/QLColorCode
