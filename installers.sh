@@ -53,7 +53,6 @@ update_linux() {
   fi
 
   info "Updating packet managers..."
-
   sudo apt update && sudo apt upgrade
 
   finish
@@ -115,15 +114,11 @@ install_python() {
     success "You already have Python installed. Skipping..."
   fi
 
-  info "Installing global python packages..."
-
   packages=(
     pip
     poetry
   )
-
   echo "Installing: ${packages[*]}"
-
   python3.11 -m pip install --upgrade "${packages[@]}"
 
   finish
