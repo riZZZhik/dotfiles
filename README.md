@@ -2,8 +2,22 @@
 
 ## Installation
 
+```bash
+# Clone dotfiles repo
+git clone https://github.com/denysdovhan/dotfiles.git $HOME/.dotfiles
+
+# Go to the dotfiles directory
+cd $HOME/.dotfiles
+
+# Install dotfiles
+./install
+```
+
 ## Resources
 
-Resources that I used to make these dotfiles:
+This repository is inspired by [denysdovhan's dotfiles](https://github.com/denysdovhan/dotfiles)
 
-- [denysdovhan's dotfiles](https://github.com/denysdovhan/dotfiles)
+## TODO
+
+- [] Update script
+- [] Install at least CLI tools on Linux
