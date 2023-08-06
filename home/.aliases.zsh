@@ -42,9 +42,6 @@ alias o='open'
 alias oo='open .'
 alias term='open -a iterm.app'
 
-# Run scripts
-alias update="source $DOTFILES/scripts/update"
-
 # Quick jump to dotfiles
 alias dotfiles="code $DOTFILES"
 
