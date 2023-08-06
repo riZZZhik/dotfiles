@@ -87,8 +87,11 @@ install_software() {
     error "Error: Brew is not available"
   fi
 
+  # fzf
+  echo "y\ny\nn" | $(brew --prefix)/opt/fzf/install
+
   # Colorls
-  gem install colorls
+  sudo gem install colorls
 
   finish
 }
