@@ -1,0 +1,6 @@
+# Editor ignores
+.idea
+.vscode
+
+# System ignores
+.DS_Store
