@@ -53,7 +53,7 @@ cask "font-fira-code-nerd-font"
 # Utils
 cask "gpg-suite"
 cask "openvpn-connect"
-casl "raycast"
+cask "raycast"
 
 # Quick Look plugins
 cask "qlcolorcode" # https://github.com/anthonygelibert/QLColorCode
