@@ -43,14 +43,17 @@ _extend_path "$HOME/.local/bin"
 # Export oh-my-zsh
 export ZSH="$HOME/.local/share/sheldon/repos/github.com/ohmyzsh/ohmyzsh"
 plugins=(
-  history-substring-search
-  sudo
+  macos          # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/macos
+  git            # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git
+  brew           # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/brew
+  docker         # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/docker
+  docker-compose # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/docker-compose
+  sudo           # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/sudo
+
+  colored-man-pages       # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/colored-man-page
+
   ssh-agent
   gpg-agent
-  macos
-  docker
-  git
-  command-not-found
 )
 
 # Load sheldon plugins
