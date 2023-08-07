@@ -85,7 +85,7 @@ install_homebrew() {
 
   info "Trying to detect installed Homebrew..."
 
-  if ! _exists brew; then
+  if ! _exists /opt/homebrew/bin/brew; then
     info "Installing Homebrew..."
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     eval "$(/opt/homebrew/bin/brew shellenv)"

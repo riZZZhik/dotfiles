@@ -1,4 +1,5 @@
 # Project ignores
+Brewfile.lock.json
 home/.config/iterm2
 home/.config/raycast
 home/.config/thefuck
