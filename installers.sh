@@ -106,14 +106,14 @@ install_software() {
   info "Installing software..."
 
   # Homebrew Bundle
-  if _exists brew; then
-    brew bundle
+  if _exists /opt/homebrew/bin/brew; then
+    /opt/homebrew/bin/brew bundle
   else
     error "Error: Brew is not available"
   fi
 
   # fzf
-  echo "y\ny\nn" | $(brew --prefix)/opt/fzf/install
+  echo "y\ny\nn" | $(/opt/homebrew/bin/brew --prefix)/opt/fzf/install
 
   # Colorls
   sudo gem install colorls
@@ -126,8 +126,8 @@ install_python() {
     info "Installing Python..."
 
     if [ "$(uname)" = "Darwin" ]; then
-      brew install python@3.11
-      brew link --overwirte python@3.11
+      /opt/homebrew/bin/brew install python@3.11
+      /opt/homebrew/bin/brew link --overwirte python@3.11
     elif [ "$(uname)" = "Linux" ]; then
       sudo apt install wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
       sudo add-apt-repository ppa:deadsnakes/ppa
