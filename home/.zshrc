@@ -77,14 +77,14 @@ _source ~/.fzf.zsh
 # Setup thefuck
 eval $(thefuck --alias)
 
-# Export secrets for MTS AI
-_source ~/.secrets_mts.sh
-
 # Color ls (https://github.com/athityakumar/colorls)
 _source $(dirname $(gem which colorls))/tab_complete.sh
 
 # Export custom aliases
 _source ~/.aliases.zsh
+
+# Export secrets
+_source ~/.secrets.sh
 
 # ------------------------------------------------------------------------------
 
