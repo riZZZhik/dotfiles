@@ -1,0 +1,12 @@
+# Project ignores
+Brewfile.lock.json
+home/.config/iterm2
+home/.config/raycast
+home/.config/thefuck
+
+# Editor ignores
+.idea
+.vscode
+
+# System ignores
+.DS_Store

@@ -1,0 +1,33 @@
+- defaults:
+    link:
+      glob: true
+      create: true
+      relink: true
+      force: true
+    shell:
+      stdin: true
+      stdout: true
+      stderr: true
+
+- clean: ["~"]
+
+- link:
+    ~/:
+      path: home/.*
+
+- create:
+    ~/.ssh:
+      mode: 0700
+    ~/Desktop/dev:
+
+- shell:
+    - description: Update packet managers
+      command: source scripts/bootstrap.sh && update_linux && install_clt && install_homebrew
+
+    - description: Install software
+      command: source scripts/bootstrap.sh && install_software
+
+    - description: Install python
+      command: source scripts/bootstrap.sh && install_python
+
+    - source scripts/bootstrap.sh && on_finish
