@@ -10,16 +10,16 @@ brew "git"                       # https://git-scm.com
 brew "git-lfs"                   # https://git-lfs.com
 brew "mas"                       # https://github.com/mas-cli/mas
 brew "neovim"                    # https://neovim.io
-brew "python@3.11"               # https://www.python.org
-brew "ruby"                      # https://www.ruby-lang.org/ru
+brew "python@3.11"               # https://python.org
+brew "ruby"                      # https://ruby-lang.org/ru
 brew "sheldon"                   # https://sheldon.cli.rs
 brew "thefuck"                   # https://github.com/nvbn/thefuck
 brew "trash-cli"                 # https://github.com/andreafrancia/trash-cli
 brew "tldr"                      # https://tldr.sh
 brew "terminal-notifier"         # https://github.com/julienXX/terminal-notifier
 brew "tmux"                      # https://github.com/tmux/tmux/wiki
-brew "wget"                      # https://www.gnu.org/software/wget
-brew "zsh"                       # https://www.zsh.org
+brew "wget"                      # https://gnu.org/software/wget
+brew "zsh"                       # https://zsh.org
 brew "zsh-completions"           # https://github.com/zsh-users/zsh-completions
 
 # ------------------------------------------------------------------------------
@@ -37,13 +37,13 @@ cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
 cask "mattermost"                # https://mattermost.com
 cask "ticktick"                  # https://ticktick.com
-cask "notion"                    # https://www.notion.so
+cask "notion"                    # https://notion.so
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
 
 # Development
 cask "fig"                       # https://fig.io
-cask "jetbrains-toolbox"         # https://www.jetbrains.com/toolbox-app
+cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
 cask "iterm2"                    # https://iterm2.com
 cask "netron"                    # https://netron.app
 cask "visual-studio-code"        # https://code.visualstudio.com
@@ -54,13 +54,13 @@ cask "font-fira-code"            # https://github.com/tonsky/FiraCode
 cask "font-fira-code-nerd-font"  # https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode
 
 # Utils
-cask "cheatsheet"                # https://www.mediaatelier.com/CheatSheet
+cask "cheatsheet"                # https://mediaatelier.com/CheatSheet
 cask "gpg-suite"                 # https://gpgtools.org
 cask "karabiner-elements"        # https://karabiner-elements.pqrs.org
-cask "logi-options-plus"         # https://www.logitech.com/en-us/software/logi-options-plus.html
+cask "logi-options-plus"         # https://logitech.com/en-us/software/logi-options-plus.html
 cask "openvpn-connect"           # https://openvpn.net
 cask "raycast"                   # https://raycast.com
-cask "vivid"                     # https://www.getvivid.app
+cask "vivid"                     # https://getvivid.app
 
 # Quick Look plugins
 cask "qlcolorcode"               # https://github.com/anthonygelibert/QLColorCode
