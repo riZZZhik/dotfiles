@@ -36,6 +36,7 @@ cask "arc"                       # https://arc.net
 cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
 cask "mattermost"                # https://mattermost.com
+cask "ticktick"                  # https://ticktick.com
 cask "notion"                    # https://www.notion.so
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
