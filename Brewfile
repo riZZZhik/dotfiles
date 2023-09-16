@@ -57,6 +57,7 @@ cask "font-fira-code-nerd-font"  # https://github.com/ryanoasis/nerd-fonts/tree/
 cask "cheatsheet"                # https://mediaatelier.com/CheatSheet
 cask "gpg-suite"                 # https://gpgtools.org
 cask "karabiner-elements"        # https://karabiner-elements.pqrs.org
+cask "linearmouse"               # https://linearmouse.app
 cask "logi-options-plus"         # https://logitech.com/en-us/software/logi-options-plus.html
 cask "openvpn-connect"           # https://openvpn.net
 cask "raycast"                   # https://raycast.com
