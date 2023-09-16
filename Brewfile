@@ -5,7 +5,7 @@
 # CLI Tools
 # ------------------------------------------------------------------------------
 brew "bat"                       # https://github.com/sharkdp/bat
-brew "docker" 			 # https://docker.com
+brew "docker" 			         # https://docker.com
 brew "fzf"                       # https://github.com/junegunn/fzf
 brew "git"                       # https://git-scm.com
 brew "git-lfs"                   # https://git-lfs.com
@@ -37,7 +37,6 @@ cask "arc"                       # https://arc.net
 cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
 cask "mattermost"                # https://mattermost.com
-cask "ticktick"                  # https://ticktick.com
 cask "notion"                    # https://notion.so
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
