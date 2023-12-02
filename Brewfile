@@ -63,12 +63,6 @@ cask "openvpn-connect"           # https://openvpn.net
 cask "raycast"                   # https://raycast.com
 cask "vivid"                     # https://getvivid.app
 
-# Quick Look plugins
-cask "qlcolorcode"               # https://github.com/anthonygelibert/QLColorCode
-cask "qlimagesize"               # https://github.com/Nyx0uf/qlImageSize
-cask "qlstephen"                 # https://github.com/whomwah/qlstephen
-cask "quicklook-json"            # https://github.com/sindresorhus/quick-look-plugins
-
 # ------------------------------------------------------------------------------
 # App Store applications
 # ------------------------------------------------------------------------------
