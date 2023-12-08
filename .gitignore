@@ -1,5 +1,6 @@
 # Project ignores
 Brewfile.lock.json
+home/.config/github-copilot
 home/.config/iterm2
 home/.config/raycast
 home/.config/thefuck

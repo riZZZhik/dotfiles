@@ -71,6 +71,9 @@ _source() {
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 _source ~/.p10k.zsh
 
+# Fix p10k bugs
+unset ZSH_AUTOSUGGEST_USE_ASYNC
+
 # Setup fzf
 _source ~/.fzf.zsh
 
