@@ -4,6 +4,7 @@
 # ------------------------------------------------------------------------------
 # CLI Tools
 # ------------------------------------------------------------------------------
+brew "asitop"                    # https://github.com/tlkh/asitop
 brew "bat"                       # https://github.com/sharkdp/bat
 brew "docker" 			         # https://docker.com
 brew "fzf"                       # https://github.com/junegunn/fzf
@@ -47,7 +48,6 @@ cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
 cask "iterm2"                    # https://iterm2.com
 cask "netron"                    # https://netron.app
 cask "visual-studio-code"        # https://code.visualstudio.com
-cask "warp"                      # https://warp.dev
 
 # Fonts
 cask "font-fira-code"            # https://github.com/tonsky/FiraCode
