@@ -4,10 +4,12 @@ home/.config/github-copilot
 home/.config/iterm2
 home/.config/raycast
 home/.config/thefuck
+home/.config/karabiner/automatic_backups
 
 # Editor ignores
 .idea
 .vscode
+.dotfiles.code-workspace
 
 # System ignores
 .DS_Store
