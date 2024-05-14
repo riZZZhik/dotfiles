@@ -1,6 +1,3 @@
-# Fig pre block. Keep at the top of this file.
-[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
-
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -35,6 +32,7 @@ _extend_path() {
 # Add custom bin to $PATH
 _extend_path "/opt/homebrew/bin"
 _extend_path "$HOME/.local/bin"
+_extend_path "$(brew --prefix)/opt/python@3.11/libexec/bin"
 
 # ------------------------------------------------------------------------------
 # Plugins
@@ -93,6 +91,3 @@ _source ~/.secrets.sh
 
 # Enable iTerm shell integration
 _source ~/.iterm2_shell_integration.zsh
-
-# Fig post block. Keep at the bottom of this file.
-[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"

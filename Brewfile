@@ -41,9 +41,9 @@ cask "mattermost"                # https://mattermost.com
 cask "notion"                    # https://notion.so
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
+cask "whisky"                    # https://getwhisky.app
 
 # Development
-cask "fig"                       # https://fig.io
 cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
 cask "iterm2"                    # https://iterm2.com
 cask "netron"                    # https://netron.app
@@ -54,6 +54,7 @@ cask "font-fira-code"            # https://github.com/tonsky/FiraCode
 cask "font-fira-code-nerd-font"  # https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode
 
 # Utils
+cask "betterdisplay"             # https://github.com/waydabber/BetterDisplay
 cask "cheatsheet"                # https://mediaatelier.com/CheatSheet
 cask "gpg-suite"                 # https://gpgtools.org
 cask "karabiner-elements"        # https://karabiner-elements.pqrs.org
