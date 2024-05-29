@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 brew "asitop"                    # https://github.com/tlkh/asitop
 brew "bat"                       # https://github.com/sharkdp/bat
-brew "docker" 			         # https://docker.com
+brew "docker" 			             # https://docker.com
 brew "fzf"                       # https://github.com/junegunn/fzf
 brew "git"                       # https://git-scm.com
 brew "git-lfs"                   # https://git-lfs.com
