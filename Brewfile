@@ -60,6 +60,7 @@ cask "gpg-suite"                 # https://gpgtools.org
 cask "karabiner-elements"        # https://karabiner-elements.pqrs.org
 cask "linearmouse"               # https://linearmouse.app
 cask "logi-options-plus"         # https://logitech.com/en-us/software/logi-options-plus.html
+cask "mos"                       # https://mos.caldis.me/
 cask "openvpn-connect"           # https://openvpn.net
 cask "raycast"                   # https://raycast.com
 cask "vivid"                     # https://getvivid.app

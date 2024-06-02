@@ -30,6 +30,7 @@ _extend_path() {
 }
 
 # Add custom bin to $PATH
+_extend_path "/opt/homebrew/sbin"
 _extend_path "/opt/homebrew/bin"
 _extend_path "$HOME/.local/bin"
 _extend_path "$(brew --prefix)/opt/python@3.11/libexec/bin"
