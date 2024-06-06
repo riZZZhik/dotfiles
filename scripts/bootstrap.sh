@@ -127,7 +127,7 @@ install_python() {
 
     if [ "$(uname)" = "Darwin" ]; then
       /opt/homebrew/bin/brew install python@3.11
-      /opt/homebrew/bin/brew link --overwirte python@3.11
+      /opt/homebrew/bin/brew link --overwrite python@3.11
     elif [ "$(uname)" = "Linux" ]; then
       sudo apt install wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
       sudo add-apt-repository ppa:deadsnakes/ppa

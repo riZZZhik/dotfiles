@@ -27,7 +27,7 @@ brew "zsh-completions"           # https://github.com/zsh-users/zsh-completions
 # ------------------------------------------------------------------------------
 # Taps
 # ------------------------------------------------------------------------------
-tap "homebrew/cask-fonts"        # https://github.com/Homebrew/homebrew-cask-fonts
+
 
 # ------------------------------------------------------------------------------
 # Cask
