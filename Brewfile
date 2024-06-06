@@ -39,6 +39,7 @@ cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
 cask "mattermost"                # https://mattermost.com
 cask "notion"                    # https://notion.so
+cask "spotify"                   # https://spotify.com
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
 cask "whisky"                    # https://getwhisky.app
