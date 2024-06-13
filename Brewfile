@@ -43,6 +43,7 @@ cask "spotify"                   # https://spotify.com
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
 cask "whisky"                    # https://getwhisky.app
+casl "zoom"                      # https://zoom.us
 
 # Development
 cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
@@ -61,6 +62,7 @@ cask "gpg-suite"                 # https://gpgtools.org
 cask "karabiner-elements"        # https://karabiner-elements.pqrs.org
 cask "linearmouse"               # https://linearmouse.app
 cask "logi-options-plus"         # https://logitech.com/en-us/software/logi-options-plus.html
+cask "logitech-g-hub"            # https://logitechg.com/en-us/innovation/g-hub.html
 cask "mos"                       # https://mos.caldis.me/
 cask "openvpn-connect"           # https://openvpn.net
 cask "raycast"                   # https://raycast.com
