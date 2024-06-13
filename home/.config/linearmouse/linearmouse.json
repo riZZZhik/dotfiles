@@ -1,38 +1,38 @@
 {
   "schemes" : [
     {
+      "scrolling" : {
+        "acceleration" : {
+          "vertical" : 1
+        }
+      },
       "pointer" : {
-        "acceleration" : 1.5,
+        "acceleration" : 1.75,
         "speed" : 0.5,
         "disableAcceleration" : true
       },
       "if" : {
         "device" : {
-          "productName" : "USB Receiver",
-          "category" : "mouse",
+          "vendorID" : "0x46d",
           "productID" : "0xc547",
-          "vendorID" : "0x46d"
-        }
-      },
-      "scrolling" : {
-        "acceleration" : {
-          "vertical" : 1
+          "category" : "mouse",
+          "productName" : "USB Receiver"
         }
       }
     },
     {
-      "pointer" : {
-        "disableAcceleration" : false,
-        "acceleration" : 0.6875,
-        "speed" : 0.0689655172413792768
-      },
       "if" : {
         "device" : {
+          "vendorID" : "0x5ac",
           "category" : "trackpad",
           "productName" : "Apple Internal Keyboard \/ Trackpad",
-          "productID" : "0x342",
-          "vendorID" : "0x5ac"
+          "productID" : "0x342"
         }
+      },
+      "pointer" : {
+        "speed" : 0.0689655172413792768,
+        "acceleration" : 0.6875,
+        "disableAcceleration" : false
       }
     }
   ],
