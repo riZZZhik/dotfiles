@@ -43,7 +43,7 @@ cask "spotify"                   # https://spotify.com
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
 cask "whisky"                    # https://getwhisky.app
-casl "zoom"                      # https://zoom.us
+cask "zoom"                      # https://zoom.us
 
 # Development
 cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
