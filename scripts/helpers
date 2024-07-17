@@ -1,0 +1,63 @@
+# !/usr/bin/env bash
+
+trap on_error SIGTERM
+
+GITHUB_REPO_URL_BASE="https://github.com/rizzzhik/dotfiles"
+
+# Initialize helpers
+
+e='\033'
+RESET="${e}[0m"
+BOLD="${e}[1m"
+CYAN="${e}[0;96m"
+RED="${e}[0;91m"
+YELLOW="${e}[0;93m"
+GREEN="${e}[0;92m"
+
+_exists() {
+  command -v "$1" > /dev/null 2>&1
+}
+
+info() {
+  echo -e "${CYAN}${*}${RESET}"
+}
+
+error() {
+  echo -e "${RED}${*}${RESET}"
+}
+
+success() {
+  echo -e "${GREEN}${*}${RESET}"
+}
+
+finish() {
+  success "Done!"
+  sleep 1
+}
+
+on_error() {
+  echo
+  error "Wow... Something serious happened!"
+  error "Though, I don't know what really happened :("
+  error "In case, you want to help me fix this problem, raise an issue -> ${CYAN}${GITHUB_REPO_URL_BASE}issues/new${RESET}"
+  echo
+  exit 1
+}
+
+on_finish() {
+  echo
+  success "Setup was successfully done!"
+  success "Happy Coding!"
+  echo
+  echo -ne "$RED"'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
+  echo -e  "$RESET""$BOLD"',------,'"$RESET"
+  echo -ne "$YELLOW"'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
+  echo -e  "$RESET""$BOLD"'|   /\_/\\'"$RESET"
+  echo -ne "$GREEN"'-_-_-_-_-_-_-_-_-_-_-_-_-_-'
+  echo -e  "$RESET""$BOLD"'~|__( ^ .^)'"$RESET"
+  echo -ne "$CYAN"'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
+  echo -e  "$RESET""$BOLD"'""  ""'"$RESET"
+  echo
+  info "P.S: Don't forget to restart a terminal :)"
+  echo
+}
