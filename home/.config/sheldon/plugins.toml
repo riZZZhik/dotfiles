@@ -71,6 +71,10 @@ apply = ["defer"]
 github = "marzocchi/zsh-notify"
 apply = ["defer"]
 
+[plugins.autoswitch-virtualenv]
+github = "MichaelAquilina/zsh-autoswitch-virtualenv"
+apply = ["defer"]
+
 # Templates
 
 [templates]
