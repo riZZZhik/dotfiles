@@ -87,6 +87,8 @@ on_finish() {
   echo
 }
 
+# Main function
+
 main() {
   echo "Before we proceed, please type your sudo password:"
   sudo -v
