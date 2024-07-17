@@ -71,9 +71,6 @@ install_software() {
     error "Error: Brew is not available"
   fi
 
-  # fzf
-  echo "y\ny\nn" | $(/opt/homebrew/bin/brew --prefix)/opt/fzf/install
-
   # Colorls
   sudo gem install colorls
 
