@@ -9,7 +9,7 @@ help: ## Display this help screen
 
 .PHONY: install
 install: ## Install dotfiles
-	./install
+	sudo -v && ./install
 
 .PHONY: update
 update: ## Update dotfiles and dependencies
