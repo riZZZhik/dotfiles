@@ -74,7 +74,7 @@ _source ~/.p10k.zsh
 unset ZSH_AUTOSUGGEST_USE_ASYNC
 
 # Setup fzf
-_source ~/.fzf.zsh
+source <(fzf --zsh)
 
 # Setup thefuck
 eval $(thefuck --alias)
