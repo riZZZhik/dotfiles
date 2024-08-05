@@ -19,5 +19,6 @@ This repository is inspired by [denysdovhan's dotfiles](https://github.com/denys
 
 ## TODO
 
-- [ ] Update script
 - [ ] Install at least CLI tools on Linux
+- [x] Makefile
+- [x] Update script
