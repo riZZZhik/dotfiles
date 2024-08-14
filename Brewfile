@@ -61,6 +61,7 @@ cask "font-fira-code"            # https://github.com/tonsky/FiraCode
 cask "font-fira-code-nerd-font"  # https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode
 
 # Utils
+cask "bartender"                 # https://macbartender.com
 cask "betterdisplay"             # https://github.com/waydabber/BetterDisplay
 cask "cheatsheet"                # https://mediaatelier.com/CheatSheet
 cask "gpg-suite"                 # https://gpgtools.org
