@@ -6,11 +6,16 @@
 # ------------------------------------------------------------------------------
 brew "asitop"                    # https://github.com/tlkh/asitop
 brew "bat"                       # https://github.com/sharkdp/bat
+brew "ffmpeg"                    # https://ffmpeg.org
 brew "fzf"                       # https://github.com/junegunn/fzf
 brew "git"                       # https://git-scm.com
 brew "git-lfs"                   # https://git-lfs.com
+brew "htop"                      # https://htop.dev
+brew "iproute2mac"               # https://github.com/brona/iproute2mac
 brew "mas"                       # https://github.com/mas-cli/mas
 brew "neovim"                    # https://neovim.io
+brew "openconnect"               # https://infradead.org/openconnect
+brew "python@3.10"               # https://python.org
 brew "python@3.11"               # https://python.org
 brew "ruby"                      # https://ruby-lang.org/ru
 brew "sheldon"                   # https://sheldon.cli.rs
@@ -81,7 +86,6 @@ mas "MyWallpaper", id: 1552826194
 mas "iStat Menus", id: 1319778037
 
 mas "GoodNotes", id: 1444383602
-mas "Microsoft To Do", id: 1274495053
 mas "Notability", id: 360593530
 mas "Spark", id: 1176895641
 mas "The Unarchiver",  id: 425424353
