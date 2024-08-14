@@ -6,7 +6,6 @@
 # ------------------------------------------------------------------------------
 brew "asitop"                    # https://github.com/tlkh/asitop
 brew "bat"                       # https://github.com/sharkdp/bat
-brew "docker"                    # https://docker.com
 brew "fzf"                       # https://github.com/junegunn/fzf
 brew "git"                       # https://git-scm.com
 brew "git-lfs"                   # https://git-lfs.com
@@ -46,6 +45,7 @@ cask "whisky"                    # https://getwhisky.app
 cask "zoom"                      # https://zoom.us
 
 # Development
+cask "docker"                    # https://docker.com
 cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
 cask "iterm2"                    # https://iterm2.com
 cask "netron"                    # https://netron.app
@@ -81,6 +81,7 @@ mas "MyWallpaper", id: 1552826194
 mas "iStat Menus", id: 1319778037
 
 mas "GoodNotes", id: 1444383602
+mas "Microsoft To Do", id: 1274495053
 mas "Notability", id: 360593530
 mas "Spark", id: 1176895641
 mas "The Unarchiver",  id: 425424353
