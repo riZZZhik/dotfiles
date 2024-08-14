@@ -28,15 +28,33 @@ update_brew() {
   finish
 }
 
+update_python() {
+  if [ $# -ne 1 ]; then
+    echo "Usage: update_python <version>"
+    return
+  fi
+
+  version=$1
+
+  packages=(
+    pip
+    poetry
+  )
+  echo "Installing: ${packages[*]}"
+  python$version -m pip install --upgrade "${packages[@]}"
+}
+
 # Main function
 
 main() {
   echo "Before we proceed, please type your sudo password:"
   sudo -v
 
-  update_dotfiles "$*"
-  update_brew "$*"
-  on_finish "$*"
+  # update_dotfiles
+  # update_brew
+  update_python 3.10
+  update_python 3.11
+  on_finish
 }
 
 main "$*"

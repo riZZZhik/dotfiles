@@ -28,6 +28,6 @@
       command: source scripts/bootstrap && install_software
 
     - description: Install python
-      command: source scripts/bootstrap && install_python
+      command: source scripts/bootstrap && install_python 3.10 && install_python 3.11
 
     - source scripts/bootstrap && on_finish
