@@ -10,7 +10,13 @@ git clone https://github.com/riZZZhik/dotfiles.git $HOME/.dotfiles
 cd $HOME/.dotfiles
 
 # Install dotfiles
-./install
+make install
+```
+
+## Update
+
+```bash
+make update
 ```
 
 ## Resources
