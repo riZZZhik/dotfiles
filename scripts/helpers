@@ -1,4 +1,4 @@
-# !/usr/bin/env bash
+#!/usr/bin/env bash
 
 trap on_error SIGTERM
 
@@ -15,7 +15,7 @@ YELLOW="${e}[0;93m"
 GREEN="${e}[0;92m"
 
 _exists() {
-  command -v "$1" > /dev/null 2>&1
+  command -v "$1" >/dev/null 2>&1
 }
 
 info() {
@@ -50,13 +50,13 @@ on_finish() {
   success "Happy Coding!"
   echo
   echo -ne "$RED"'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
-  echo -e  "$RESET""$BOLD"',------,'"$RESET"
+  echo -e "$RESET""$BOLD"',------,'"$RESET"
   echo -ne "$YELLOW"'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
-  echo -e  "$RESET""$BOLD"'|   /\_/\\'"$RESET"
+  echo -e "$RESET""$BOLD"'|   /\_/\\'"$RESET"
   echo -ne "$GREEN"'-_-_-_-_-_-_-_-_-_-_-_-_-_-'
-  echo -e  "$RESET""$BOLD"'~|__( ^ .^)'"$RESET"
+  echo -e "$RESET""$BOLD"'~|__( ^ .^)'"$RESET"
   echo -ne "$CYAN"'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
-  echo -e  "$RESET""$BOLD"'""  ""'"$RESET"
+  echo -e "$RESET""$BOLD"'""  ""'"$RESET"
   echo
   info "P.S: Don't forget to restart a terminal :)"
   echo
