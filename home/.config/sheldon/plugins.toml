@@ -45,9 +45,9 @@ apply = ["defer"]
 github = "b4b4r07/enhancd"
 apply = ["defer"]
 
-[plugins."z.lua"]
-github = "skywind3000/z.lua"
-apply = ["defer"]
+# [plugins."z.lua"]
+# github = "skywind3000/z.lua"
+# apply = ["defer"]
 
 [plugins.forgit]
 github = "wfxr/forgit"
