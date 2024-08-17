@@ -121,12 +121,11 @@ setup_macos() {
   info "Enabling touchid and Apple watch for sudo..."
   curl -s https://raw.githubusercontent.com/kevinmcox/macOS-Admin-Scripts/main/TouchIDsudo.sh | sudo bash -s -- -e
 
+  # You can find other defaults at https://macos-defaults.com
   info "Writing to apple defaults. You can find what changes in scripts/bootstrap:setup_macos"
 
   # Close System Preferences panes, to prevent them from overriding settings we’re about to change
   osascript -e 'tell application "System Preferences" to quit'
-
-  # You can find other defaults at https://macos-defaults.com
 
   # Settings > Control Center
   # Bluetooth: always show in menu bar
@@ -156,12 +155,17 @@ setup_macos() {
   defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 
   # Finder
+  # Show all extensions
   defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-  defaults write com.apple.finder AppleShowAllFiles -bool true
+  # Disable warning for changing file extension
   defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+  # Show hidden files
+  defaults write com.apple.finder AppleShowAllFiles -bool true
+  # Show path bar and title
   defaults write com.apple.finder ShowPathbar -bool true
-  defaults write com.apple.finder _FXSortFoldersFirst -bool true
   defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
+  # Show folders first
+  defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
   killall Finder
 }
