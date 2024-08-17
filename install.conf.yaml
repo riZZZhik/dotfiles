@@ -33,4 +33,7 @@
     - description: Setup macos
       command: source scripts/bootstrap && setup_macos
 
+    - description: Setup tmux
+      command: source scripts/bootstrap && setup_tmux
+
     - source scripts/bootstrap && on_finish
