@@ -50,8 +50,8 @@ main() {
   echo "Before we proceed, please type your sudo password:"
   sudo -v
 
-  # update_dotfiles
-  # update_brew
+  update_dotfiles
+  update_brew
   update_python 3.10
   update_python 3.11
   on_finish
