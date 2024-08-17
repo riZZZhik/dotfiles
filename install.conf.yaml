@@ -30,4 +30,7 @@
     - description: Install python
       command: source scripts/bootstrap && install_python 3.10 && install_python 3.11
 
+    - description: Setup macos
+      command: source scripts/bootstrap && setup_macos
+
     - source scripts/bootstrap && on_finish

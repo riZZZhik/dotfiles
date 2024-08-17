@@ -112,3 +112,56 @@ install_python() {
 
   finish
 }
+
+setup_macos() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return
+  fi
+
+  info "Enabling touchid and Apple watch for sudo..."
+  curl -s https://raw.githubusercontent.com/kevinmcox/macOS-Admin-Scripts/main/TouchIDsudo.sh | sudo bash -s -- -e
+
+  info "Writing to apple defaults. You can find what changes in scripts/bootstrap:setup_macos"
+
+  # Close System Preferences panes, to prevent them from overriding settings we’re about to change
+  osascript -e 'tell application "System Preferences" to quit'
+
+  # You can find other defaults at https://macos-defaults.com
+
+  # Settings > Control Center
+  # Bluetooth: always show in menu bar
+  defaults -currentHost write com.apple.controlcenter Bluetooth -int 18
+  # Sound: always show in menu bar
+  defaults -currentHost write com.apple.controlcenter Sound -int 18
+
+  # Settings > Desktop & Dock
+  # Enable expose
+  defaults write com.apple.dock "scroll-to-open" -bool true
+  defaults write com.apple.dock showAppExposeGestureEnabled -bool true
+  # Mission control: Disable automatically rearrange spaces
+  defaults write com.apple.dock "mru-spaces" -bool false
+  # Hot corners: Screen saver in bottom left
+  defaults write com.apple.dock "wvous-bl-corner" -int 5
+  defaults write com.apple.dock "wvous-bl-modifier" -int 0
+
+  killall Dock
+
+  # Settings > Keyboard
+  # Disable dot after double spaces
+  defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
+  # Disable quotes replacements
+  defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+  defaults write ru.keepcoder.Telegram AutomaticQuoteSubstitutionEnabledTGGrowingTextView -bool false
+  # Disable press and hold symbols
+  defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+  # Finder
+  defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+  defaults write com.apple.finder AppleShowAllFiles -bool true
+  defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+  defaults write com.apple.finder ShowPathbar -bool true
+  defaults write com.apple.finder _FXSortFoldersFirst -bool true
+  defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
+
+  killall Finder
+}
