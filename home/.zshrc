@@ -20,6 +20,11 @@ export LANGUAGE=en_US.UTF-8
 # Python
 export POETRY_VIRTUALENVS_IN_PROJECT=true
 
+# Setup go
+export GONOPROXY="git.mts.ai/*"
+export GONOSUMDB="git.mts.ai/*"
+export GOPRIVATE="git.mts.ai/*"
+
 # Extend $PATH without duplicates
 _extend_path() {
   [[ -d "$1" ]] || return
