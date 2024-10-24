@@ -39,6 +39,8 @@ _extend_path "/opt/homebrew/sbin"
 _extend_path "/opt/homebrew/bin"
 _extend_path "$HOME/.local/bin"
 _extend_path "$(brew --prefix)/opt/python@3.11/libexec/bin"
+_extend_path "$(brew --prefix)/opt/go@1.22/bin"
+_extend_path "$(go env GOPATH)/bin"
 
 # ------------------------------------------------------------------------------
 # Plugins
