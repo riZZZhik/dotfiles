@@ -10,7 +10,7 @@ fi
 # ------------------------------------------------------------------------------
 
 # User settings
-export EDITOR="nvim"
+export EDITOR=nvim
 
 # Locale
 export LC_ALL=en_US.UTF-8
@@ -93,7 +93,7 @@ _source ~/.aliases.zsh
 _source ~/.secrets.sh
 
 # Fix p10k bugs
-unset ZSH_AUTOSUGGEST_USE_ASYNC
+export ZSH_AUTOSUGGEST_USE_ASYNC=false
 
 # ------------------------------------------------------------------------------
 
