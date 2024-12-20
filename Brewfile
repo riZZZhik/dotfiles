@@ -74,6 +74,10 @@ cask "openvpn-connect"           # https://openvpn.net
 cask "raycast"                   # https://raycast.com
 cask "vivid"                     # https://getvivid.app
 
+# QuickLook plugins
+cask "syntax-highlight"          # https://github.com/sbarex/SourceCodeSyntaxHighlight
+cask "qlmarkdown"                # https://github.com/toland/qlmarkdown
+
 # ------------------------------------------------------------------------------
 # App Store applications
 # ------------------------------------------------------------------------------
