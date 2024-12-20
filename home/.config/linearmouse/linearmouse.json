@@ -2,48 +2,68 @@
   "$schema" : "https:\/\/schema.linearmouse.app\/0.10.0",
   "schemes" : [
     {
-      "if" : {
-        "device" : {
-          "vendorID" : "0x46d",
-          "productName" : "USB Receiver",
-          "productID" : "0xc547",
-          "category" : "mouse"
+      "scrolling" : {
+        "acceleration" : {
+          "vertical" : 1
         }
       },
       "pointer" : {
+        "speed" : 0.0689655172413792768,
         "disableAcceleration" : true,
-        "acceleration" : 1.75,
-        "speed" : 0.0689655172413792768
+        "acceleration" : 1.75
+      },
+      "if" : {
+        "device" : {
+          "productID" : "0xc547",
+          "vendorID" : "0x46d",
+          "productName" : "USB Receiver",
+          "category" : "mouse"
+        }
+      }
+    },
+    {
+      "if" : {
+        "device" : {
+          "productID" : "0x342",
+          "productName" : "Apple Internal Keyboard \/ Trackpad",
+          "vendorID" : "0x5ac",
+          "category" : "trackpad"
+        }
+      },
+      "pointer" : {
+        "acceleration" : 0.6875,
+        "speed" : 0.0689655172413792768,
+        "disableAcceleration" : false
       },
       "scrolling" : {
+        "speed" : {
+          "vertical" : 0
+        },
+        "distance" : {
+          "vertical" : "auto"
+        },
         "acceleration" : {
           "vertical" : 1
         }
       }
     },
     {
-      "scrolling" : {
-        "distance" : {
-          "vertical" : "auto"
-        },
-        "acceleration" : {
-          "vertical" : 1
-        },
-        "speed" : {
-          "vertical" : 0
-        }
-      },
       "pointer" : {
-        "speed" : 0.0689655172413792768,
-        "disableAcceleration" : false,
-        "acceleration" : 0.6875
+        "acceleration" : 1.75,
+        "disableAcceleration" : true
       },
       "if" : {
         "device" : {
-          "productName" : "Apple Internal Keyboard \/ Trackpad",
-          "category" : "trackpad",
-          "vendorID" : "0x5ac",
-          "productID" : "0x342"
+          "category" : "mouse",
+          "productID" : "0xc094",
+          "serialNumber" : "898CB54F",
+          "vendorID" : "0x46d",
+          "productName" : "PRO X Wireless"
+        }
+      },
+      "scrolling" : {
+        "acceleration" : {
+          "vertical" : 1
         }
       }
     }
