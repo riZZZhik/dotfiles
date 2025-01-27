@@ -1,5 +1,4 @@
 {
-  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.0",
   "schemes" : [
     {
       "scrolling" : {
@@ -7,21 +6,37 @@
           "vertical" : 1
         }
       },
-      "pointer" : {
-        "speed" : 0.0689655172413792768,
-        "disableAcceleration" : true,
-        "acceleration" : 1.75
-      },
       "if" : {
         "device" : {
-          "productID" : "0xc547",
-          "vendorID" : "0x46d",
+          "category" : "mouse",
           "productName" : "USB Receiver",
-          "category" : "mouse"
+          "vendorID" : "0x46d",
+          "productID" : "0xc547"
         }
+      },
+      "pointer" : {
+        "acceleration" : 1.5,
+        "speed" : 0.0689655172413792768,
+        "disableAcceleration" : true
       }
     },
     {
+      "scrolling" : {
+        "speed" : {
+          "vertical" : 0
+        },
+        "acceleration" : {
+          "vertical" : 1
+        },
+        "distance" : {
+          "vertical" : "auto"
+        }
+      },
+      "pointer" : {
+        "speed" : 0.0689655172413792768,
+        "disableAcceleration" : false,
+        "acceleration" : 0.6875
+      },
       "if" : {
         "device" : {
           "productID" : "0x342",
@@ -29,43 +44,43 @@
           "vendorID" : "0x5ac",
           "category" : "trackpad"
         }
-      },
-      "pointer" : {
-        "acceleration" : 0.6875,
-        "speed" : 0.0689655172413792768,
-        "disableAcceleration" : false
-      },
-      "scrolling" : {
-        "speed" : {
-          "vertical" : 0
-        },
-        "distance" : {
-          "vertical" : "auto"
-        },
-        "acceleration" : {
-          "vertical" : 1
-        }
       }
     },
     {
-      "pointer" : {
-        "acceleration" : 1.75,
-        "disableAcceleration" : true
-      },
       "if" : {
         "device" : {
-          "category" : "mouse",
-          "productID" : "0xc094",
           "serialNumber" : "898CB54F",
           "vendorID" : "0x46d",
-          "productName" : "PRO X Wireless"
+          "productName" : "PRO X Wireless",
+          "productID" : "0xc094",
+          "category" : "mouse"
         }
       },
       "scrolling" : {
         "acceleration" : {
           "vertical" : 1
         }
+      },
+      "pointer" : {
+        "acceleration" : 1.75,
+        "disableAcceleration" : true
+      }
+    },
+    {
+      "if" : {
+        "device" : {
+          "serialNumber" : "pqrs.org:Karabiner-DriverKit-VirtualHIDPointing",
+          "productName" : "Karabiner DriverKit VirtualHIDPointing 1.8.0",
+          "vendorID" : "0x16c0",
+          "category" : "mouse",
+          "productID" : "0x27da"
+        }
+      },
+      "pointer" : {
+        "acceleration" : 1.75,
+        "disableAcceleration" : true
       }
     }
-  ]
+  ],
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.0"
 }
