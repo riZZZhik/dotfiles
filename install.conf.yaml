@@ -18,7 +18,7 @@
 - create:
     ~/.ssh:
       mode: 0700
-    ~/Desktop/dev:
+    ~/dev:
 
 - shell:
     - description: Update packet managers

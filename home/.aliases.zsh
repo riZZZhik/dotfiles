@@ -6,7 +6,7 @@
 alias sudo='sudo '
 
 _exists() {
-  command -v $1 > /dev/null 2>&1
+  command -v $1 >/dev/null 2>&1
 }
 
 # Avoid stupidity with trash-cli:
@@ -23,9 +23,9 @@ alias c='clear'
 alias q="cd ~ && clear"
 
 # Folders Shortcuts
-[ -d ~/Downloads ]   && alias dl='cd ~/Downloads'
-[ -d ~/Desktop ]     && alias dt='cd ~/Desktop'
-[ -d ~/Desktop/dev ] && alias dev='cd ~/Desktop/dev'
+[ -d ~/Downloads ] && alias dl='cd ~/Downloads'
+[ -d ~/Desktop ] && alias dt='cd ~/Desktop'
+[ -d ~/dev ] && alias dev='cd ~/dev'
 function mkcd {
   command mkdir $1 && cd $1
 }
