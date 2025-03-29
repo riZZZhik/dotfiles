@@ -3,6 +3,9 @@
 ## Installation
 
 ```bash
+# Install git and other xcode tools
+xcode-select --install
+
 # Clone dotfiles repo
 git clone https://github.com/riZZZhik/dotfiles.git $HOME/.dotfiles
 
@@ -22,9 +25,3 @@ make update
 ## Resources
 
 This repository is inspired by [denysdovhan's dotfiles](https://github.com/denysdovhan/dotfiles)
-
-## TODO
-
-- [ ] Install at least CLI tools on Linux
-- [x] Makefile
-- [x] Update script
