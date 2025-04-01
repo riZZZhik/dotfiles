@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+# Source helpers
+
+source "$(dirname "$0")/helpers"
+
+# Initialize functions
+
+update_dotfiles() {
+  info "Updating dotfiles..."
+
+  cd "$DOTFILES" || exit
+  git pull origin main
+  git submodule foreach git pull origin master
+}
+
+update_brew() {
+  if ! _exists brew; then
+    return
+  fi
+
+  info "Updating Homebrew..."
+
+  brew update
+  brew upgrade --greedy
+  brew cleanup
+
+  finish
+}
+
+update_python() {
+  if [ $# -ne 1 ]; then
+    echo "Usage: update_python <version>"
+    return
+  fi
+
+  version=$1
+
+  packages=(
+    pip
+    poetry
+  )
+  echo "Installing: ${packages[*]}"
+  python$version -m pip install --upgrade "${packages[@]}"
+
+  finish
+}
+
+# Main function
+
+main() {
+  echo "Before we proceed, please type your sudo password:"
+  sudo -v
+
+  update_dotfiles
+  update_brew
+  update_python 3.10
+  update_python 3.12
+  on_finish
+}
+
+main "$*"

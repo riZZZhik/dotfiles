@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+
+# Source helpers
+
+source "$(dirname "$0")/helpers"
+
+# Initialize functions
+
+update_linux() {
+  if [ "$(uname)" != "Linux" ]; then
+    return
+  fi
+
+  info "Updating packet managers..."
+  sudo apt update && sudo apt upgrade
+
+  finish
+}
+
+install_clt() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return
+  fi
+
+  info "Trying to detect installed Command Line Tools for Xcode..."
+
+  xcode-select -p &>/dev/null
+  if [ $? -ne 0 ]; then
+    info "Installing Command Line Tools for Xcode..."
+    touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    PROD=$(softwareupdate -l | grep "\*.*Command Line" | tail -n 1 | sed 's/^[^C]* //')
+    softwareupdate -i "$PROD" --verbose
+  else
+    success "You already have Command Line Tools for Xcode installed. Skipping..."
+  fi
+
+  finish
+}
+
+install_homebrew() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return
+  fi
+
+  info "Trying to detect installed Homebrew..."
+
+  if ! _exists /opt/homebrew/bin/brew; then
+    info "Installing Homebrew..."
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  else
+    success "You already have Homebrew installed. Skipping..."
+  fi
+
+  finish
+}
+
+install_software() {
+  if [ "$(uname)" != "Darwin" ]; then
+    echo "Installing software is only supported for macos."
+    echo "You can manually download software. It is listed in ${BOLD}Brewfile${RESET}."
+    return
+  fi
+
+  info "Installing software..."
+
+  # Homebrew Bundle
+  if _exists /opt/homebrew/bin/brew; then
+    /opt/homebrew/bin/brew bundle
+  else
+    error "Error: Brew is not available"
+  fi
+
+  # Colorls
+  # https://github.com/athityakumar/colorls/issues/619
+  PATH="/opt/homebrew/opt/ruby/bin:$PATH" \
+    LDFLAGS="-L/opt/homebrew/opt/ruby/lib" \
+    CPPFLAGS="-I/opt/homebrew/opt/ruby/include" \
+    PKG_CONFIG_PATH="/opt/homebrew/opt/ruby/lib/pkgconfig" \
+    sudo gem install colorls
+  # sudo gem install public_suffix -v 5.1.1
+
+  finish
+}
+
+install_python() {
+  if [ $# -ne 1 ]; then
+    echo "Usage: install_python <version>"
+    return
+  fi
+
+  version=$1
+
+  if ! _exists python@$version; then
+    info "Installing Python $version..."
+
+    if [ "$(uname)" = "Darwin" ]; then
+      /opt/homebrew/bin/brew install python@$version
+      /opt/homebrew/bin/brew link --overwrite python@$version
+    elif [ "$(uname)" = "Linux" ]; then
+      sudo apt install wget build-essential libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+      sudo add-apt-repository ppa:deadsnakes/ppa
+      sudo apt install python$version
+    else
+      error "Error: Failed to install Python $version!"
+      exit 1
+    fi
+  else
+    success "You already have Python $version installed. Skipping..."
+  fi
+
+  packages=(
+    pip
+    poetry
+  )
+  echo "Installing: ${packages[*]}"
+  python$version -m pip install --upgrade "${packages[@]}"
+
+  finish
+}
+
+setup_macos() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return
+  fi
+
+  info "Enabling touchid and Apple watch for sudo..."
+  curl -s https://raw.githubusercontent.com/kevinmcox/macOS-Admin-Scripts/main/TouchIDsudo.sh | sudo bash -s -- -e
+
+  # You can find other defaults at https://macos-defaults.com
+  info "Writing to apple defaults. You can find what changes in scripts/bootstrap:setup_macos"
+
+  # Close System Preferences panes, to prevent them from overriding settings we’re about to change
+  osascript -e 'tell application "System Preferences" to quit'
+
+  # Settings > Control Center
+  # Bluetooth: always show in menu bar
+  defaults -currentHost write com.apple.controlcenter Bluetooth -int 18
+  # Sound: always show in menu bar
+  defaults -currentHost write com.apple.controlcenter Sound -int 18
+
+  # Settings > Desktop & Dock
+  # Enable expose
+  defaults write com.apple.dock "scroll-to-open" -bool true
+  defaults write com.apple.dock showAppExposeGestureEnabled -bool true
+  # Mission control: Disable automatically rearrange spaces
+  defaults write com.apple.dock "mru-spaces" -bool false
+  # Hot corners: Screen saver in bottom left
+  defaults write com.apple.dock "wvous-bl-corner" -int 5
+  defaults write com.apple.dock "wvous-bl-modifier" -int 0
+
+  killall Dock
+
+  # Settings > Keyboard
+  # Disable dot after double spaces
+  defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
+  # Disable quotes replacements
+  defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+  defaults write ru.keepcoder.Telegram AutomaticQuoteSubstitutionEnabledTGGrowingTextView -bool false
+  # Disable press and hold symbols
+  defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+  # Finder
+  # Show all extensions
+  defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+  # Disable warning for changing file extension
+  defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+  # Show hidden files
+  defaults write com.apple.finder AppleShowAllFiles -bool true
+  # Show path bar and title
+  defaults write com.apple.finder ShowPathbar -bool true
+  defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
+  # Show folders first
+  defaults write com.apple.finder _FXSortFoldersFirst -bool true
+
+  killall Finder
+}

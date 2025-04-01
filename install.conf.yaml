@@ -1,0 +1,35 @@
+- defaults:
+    link:
+      glob: true
+      create: true
+      relink: true
+      force: true
+    shell:
+      stdin: true
+      stdout: true
+      stderr: true
+
+- clean: ["~"]
+
+- link:
+    ~/:
+      path: home/.*
+
+- create:
+    ~/dev:
+
+- shell:
+    - description: Update packet managers
+      command: source scripts/bootstrap && update_linux && install_clt && install_homebrew
+
+    - description: Install software
+      command: source scripts/bootstrap && install_software
+
+    - description: Install python
+      command: source scripts/bootstrap && install_python 3.10 && install_python 3.12
+
+    - description: Setup macos
+      command: source scripts/bootstrap && setup_macos
+
+    - source scripts/bootstrap && on_finish
+  
