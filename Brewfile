@@ -41,7 +41,9 @@ brew "zsh-completions"           # https://github.com/zsh-users/zsh-completions
 cask "arc"                       # https://arc.net
 cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
-cask "notion"                    # https://notion.so
+cask "notion"                    # https://notion.com
+cask "notion-calendar"           # https://notion.com/product/calendar
+cask "obsidian"                  # https://obsidian.md
 cask "spotify"                   # https://spotify.com
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
