@@ -1,10 +1,3 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 # ------------------------------------------------------------------------------
 # Environment
 # ------------------------------------------------------------------------------
@@ -25,7 +18,7 @@ _extend_path() {
   [[ -d "$1" ]] || return
 
   # if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
-    export PATH="$1:$PATH"
+  export PATH="$1:$PATH"
   # fi
 }
 
@@ -49,10 +42,10 @@ plugins=(
   docker-compose # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/docker-compose
   sudo           # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/sudo
 
-  colored-man-pages       # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/colored-man-page
+  colored-man-pages # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/colored-man-page
 
   ssh-agent
-#   gpg-agent
+  #   gpg-agent
 )
 
 # Load sheldon plugins
@@ -60,15 +53,12 @@ eval "$(sheldon source)"
 
 # Source if exists
 _source() {
-  if [[ -f $1 ]] ; then
+  if [[ -f $1 ]]; then
     source $1
   else
     echo "File to source not found: $1"
   fi
 }
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-_source ~/.p10k.zsh
 
 # Setup fzf
 source <(fzf --zsh)
