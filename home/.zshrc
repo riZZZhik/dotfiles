@@ -66,9 +66,6 @@ source <(fzf --zsh)
 # Setup thefuck
 eval $(thefuck --alias)
 
-# Color ls (https://github.com/athityakumar/colorls)
-# _source $(dirname $(gem which colorls))/tab_complete.sh
-
 # Export custom aliases
 _source ~/.aliases.zsh
 

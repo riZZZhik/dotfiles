@@ -1,5 +1,6 @@
 # Project ignores
 Brewfile.lock.json
+home/.config/spaceship.zsh.zwc
 home/.config/gh
 home/.config/iterm2
 home/.config/raycast

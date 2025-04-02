@@ -6,6 +6,7 @@
 # ------------------------------------------------------------------------------
 brew "asitop"                    # https://github.com/tlkh/asitop
 brew "bat"                       # https://github.com/sharkdp/bat
+brew "eza"                       # https://github.com/eza-community/eza
 brew "ffmpeg"                    # https://ffmpeg.org
 brew "fzf"                       # https://github.com/junegunn/fzf
 brew "git"                       # https://git-scm.com
@@ -17,7 +18,6 @@ brew "neovim"                    # https://neovim.io
 brew "openconnect"               # https://infradead.org/openconnect
 brew "python@3.10"               # https://python.org
 brew "python@3.12"               # https://python.org
-brew "ruby"                      # https://ruby-lang.org/ru
 brew "sheldon"                   # https://sheldon.cli.rs
 brew "thefuck"                   # https://github.com/nvbn/thefuck
 brew "trash-cli"                 # https://github.com/andreafrancia/trash-cli

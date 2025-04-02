@@ -71,15 +71,6 @@ install_software() {
     error "Error: Brew is not available"
   fi
 
-  # Colorls
-  # https://github.com/athityakumar/colorls/issues/619
-  PATH="/opt/homebrew/opt/ruby/bin:$PATH" \
-    LDFLAGS="-L/opt/homebrew/opt/ruby/lib" \
-    CPPFLAGS="-I/opt/homebrew/opt/ruby/include" \
-    PKG_CONFIG_PATH="/opt/homebrew/opt/ruby/lib/pkgconfig" \
-    sudo gem install colorls
-  # sudo gem install public_suffix -v 5.1.1
-
   finish
 }
 

@@ -63,10 +63,10 @@ fi
 
 alias git-root='cd $(git rev-parse --show-toplevel)'
 
-if _exists colorls; then
-  alias ls='colorls --almost-all --dark --gs'
-  alias ll='colorls --almost-all --dark --gs --long'
-  alias tree='colorls --tree --dark'
+if _exists eza; then
+  alias ls='eza -a --icons=auto'
+  alias ll='eza -lah'
+  alias tree='eza -T'
 fi
 
 # cat with syntax highlighting
@@ -75,5 +75,5 @@ if _exists bat; then
   # Run to list all themes:
   #   bat --list-themes
   export BAT_THEME='base16'
-  alias cat='bat'
+  alias cat='bat -p'
 fi
