@@ -37,6 +37,15 @@ alias path='echo -e ${PATH//:/\\n}'
 # Download file with original filename
 alias get="curl -O -L"
 
+# Git Shortcuts
+function gud {
+  branch=$(git branch --show-current)
+  git switch develop
+  git pull --rebase
+  git fetch --all --tags --prune --jobs=10
+  git branch --delete --force $branch
+}
+
 # Folders Shortcuts
 [ -d ~/Downloads ] && alias dl='cd ~/Downloads'
 [ -d ~/Desktop ] && alias dt='cd ~/Desktop'
