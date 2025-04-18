@@ -102,10 +102,10 @@ install_python() {
 
   packages=(
     pip
-    poetry
+    uv
   )
   echo "Installing: ${packages[*]}"
-  python$version -m pip install --upgrade "${packages[@]}"
+  python$version -m pip install --upgrade "${packages[@]}" --break-system-packages
 
   finish
 }

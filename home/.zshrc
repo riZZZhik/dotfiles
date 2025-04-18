@@ -10,9 +10,6 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 
-# Python
-export POETRY_VIRTUALENVS_IN_PROJECT=true
-
 # Extend $PATH without duplicates
 _extend_path() {
   [[ -d "$1" ]] || return
