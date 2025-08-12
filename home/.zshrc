@@ -59,9 +59,7 @@ _source() {
 
 # Setup fzf
 source <(fzf --zsh)
-
-# Setup thefuck
-eval $(thefuck --alias)
+fi
 
 # Export custom aliases
 _source ~/.aliases.zsh

@@ -19,7 +19,6 @@ brew "openconnect"               # https://infradead.org/openconnect
 brew "python@3.10"               # https://python.org
 brew "python@3.12"               # https://python.org
 brew "sheldon"                   # https://sheldon.cli.rs
-brew "thefuck"                   # https://github.com/nvbn/thefuck
 brew "trash-cli"                 # https://github.com/andreafrancia/trash-cli
 brew "tldr"                      # https://tldr.sh
 brew "terminal-notifier"         # https://github.com/julienXX/terminal-notifier
