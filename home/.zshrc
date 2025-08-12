@@ -20,6 +20,7 @@ _extend_path() {
 }
 
 # Add custom bin to $PATH
+_extend_path "$HOME/.local/bin"
 if [ "$(uname)" = "Darwin" ]; then
   _extend_path "/opt/homebrew/sbin"
   _extend_path "/opt/homebrew/bin"

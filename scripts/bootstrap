@@ -56,22 +56,46 @@ install_homebrew() {
 }
 
 install_software() {
-  if [ "$(uname)" != "Darwin" ]; then
-    echo "Installing software is only supported for macos."
-    echo "You can manually download software. It is listed in ${BOLD}Brewfile${RESET}."
+  info "Installing software..."
+
+  if [ "$(uname)" = "Darwin" ]; then
+    if _exists /opt/homebrew/bin/brew; then
+      /opt/homebrew/bin/brew bundle
+    else
+      error "Error: Brew is not available"
+    fi
+
+    finish
     return
   fi
 
-  info "Installing software..."
+  if [ "$(uname)" = "Linux" ]; then
+    # Install sheldon
+    curl --proto '=https' -fLsS https://rossmacarthur.github.io/install/crate.sh \
+      | bash -s -- --repo rossmacarthur/sheldon --to ~/.local/bin
 
-  # Homebrew Bundle
-  if _exists /opt/homebrew/bin/brew; then
-    /opt/homebrew/bin/brew bundle
-  else
-    error "Error: Brew is not available"
+    # Install other packages
+    packages=(
+      fzf
+    )
+    if _exists apt; then
+      sudo apt update && sudo apt install -y "${packages[@]}"
+    elif _exists dnf; then
+      sudo dnf install -y "${packages[@]}"
+    elif _exists pacman; then
+      sudo pacman -Sy --noconfirm "${packages[@]}"
+    else
+      error "Error: Unsupported package manager."
+    fi
+
+    echo "Only fraction of packages are installed."
+    echo "You can manually download software. It is listed in ${BOLD}Brewfile${RESET}."
+
+    finish
+    return
   fi
 
-  finish
+  error "Error: Unsupported OS. Cannot install software."
 }
 
 install_python() {
