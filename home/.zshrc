@@ -14,16 +14,17 @@ export LANGUAGE=en_US.UTF-8
 _extend_path() {
   [[ -d "$1" ]] || return
 
-  # if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
-  export PATH="$1:$PATH"
-  # fi
+  if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
+    export PATH="$1:$PATH"
+  fi
 }
 
 # Add custom bin to $PATH
-_extend_path "/opt/homebrew/sbin"
-_extend_path "/opt/homebrew/bin"
-_extend_path "$HOME/.local/bin"
-_extend_path "$(brew --prefix)/opt/python@3.12/libexec/bin"
+if [ "$(uname)" = "Darwin" ]; then
+  _extend_path "/opt/homebrew/sbin"
+  _extend_path "/opt/homebrew/bin"
+  _extend_path "$(brew --prefix)/opt/python@3.12/libexec/bin"
+fi
 
 # ------------------------------------------------------------------------------
 # Plugins
@@ -48,21 +49,58 @@ plugins=(
 # Load sheldon plugins
 eval "$(sheldon source)"
 
-# Source if exists
+# Check if a command/file exists
+_exists() {
+  if command -v -- "$1" >/dev/null 2>&1; then
+    return 0
+  else
+    echo "Command not found: $1" >&2
+    return 1
+  fi
+}
+
 _source() {
   if [[ -f $1 ]]; then
     source $1
   else
-    echo "File to source not found: $1"
+    echo "File not found: $1"
   fi
 }
 
-# Setup fzf
-source <(fzf --zsh)
+# Trash CLI - https://github.com/sindresorhus/trash-cli
+if _exists trash; then
+  alias rm='trash'
+fi
+
+# Use tldr as help util - https://github.com/tldr-pages/tldr
+if _exists tldr; then
+  alias help="tldr"
+fi
+
+# Better ls - https://github.com/eza-community/eza
+if _exists eza; then
+  alias ls='eza -a --icons=auto'
+  alias ll='eza -lah'
+  alias tree='eza -T'
+fi
+
+# Cat with syntax highlighting - https://github.com/sharkdp/bat
+if _exists bat; then
+  # Run to list all themes:
+  #   bat --list-themes
+  export BAT_THEME='ansi'
+  alias cat='bat -p'
+fi
+
+# Fuzzy finder - https://github.com/junegunn/fzf
+if _exists fzf; then
+  source <(fzf --zsh)
 fi
 
 # Export custom aliases
 _source ~/.aliases.zsh
 
 # Enable iTerm shell integration
-_source ~/.iterm2_shell_integration.zsh
+if [ "$(uname)" = "Darwin" ]; then
+  _source ~/.iterm2_shell_integration.zsh
+fi

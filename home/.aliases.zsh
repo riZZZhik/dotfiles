@@ -40,7 +40,9 @@ alias get="curl -O -L"
 # Git Shortcuts
 function gud {
   branch=$(git branch --show-current)
-  git switch develop
+  main_branch=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
+
+  git switch main_branch
   git pull --rebase
   git fetch --all --tags --prune --jobs=10
   git branch --delete --force $branch
@@ -53,35 +55,3 @@ function gud {
 function mkcd {
   command mkdir $1 && cd $1
 }
-
-# Check if a command exists
-_exists() {
-  command -v $1 >/dev/null 2>&1
-}
-
-# Avoid stupidity with trash-cli:
-# https://github.com/sindresorhus/trash-cli
-# or use default rm -i
-if _exists trash; then
-  alias rm='trash'
-fi
-
-# Use tldr as help util
-if _exists tldr; then
-  alias help="tldr"
-fi
-
-# Better ls - https://github.com/eza-community/eza
-if _exists eza; then
-  alias ls='eza -a --icons=auto'
-  alias ll='eza -lah'
-  alias tree='eza -T'
-fi
-
-# Cat with syntax highlighting - https://github.com/sharkdp/bat
-if _exists bat; then
-  # Run to list all themes:
-  #   bat --list-themes
-  export BAT_THEME='ansi'
-  alias cat='bat -p'
-fi
