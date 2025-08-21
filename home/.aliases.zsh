@@ -42,7 +42,7 @@ function gud {
   branch=$(git branch --show-current)
   main_branch=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
 
-  git switch main_branch
+  git switch $main_branch
   git pull --rebase
   git fetch --all --tags --prune --jobs=10
   git branch --delete --force $branch
