@@ -41,7 +41,7 @@ plugins=(
   docker-compose # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/docker-compose
   sudo           # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/sudo
 
-  colored-man-pages # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/colored-man-page
+  colored-man-pages # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/colored-man-pages
 
   ssh-agent
   #   gpg-agent
@@ -98,8 +98,18 @@ if _exists fzf; then
   source <(fzf --zsh)
 fi
 
+# Use passphrase from macOS keychain
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  zstyle :omz:plugins:ssh-agent ssh-add-args --apple-load-keychain
+fi
+
 # Export custom aliases
 _source ~/.aliases.zsh
+
+# Modern cd - https://github.com/ajeetdsouza/zoxide
+if _exists zoxide; then
+  eval "$(zoxide init zsh)"
+fi
 
 # Enable iTerm shell integration
 if [ "$(uname)" = "Darwin" ]; then

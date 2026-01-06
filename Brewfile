@@ -16,7 +16,6 @@ brew "iproute2mac"               # https://github.com/brona/iproute2mac
 brew "mas"                       # https://github.com/mas-cli/mas
 brew "neovim"                    # https://neovim.io
 brew "openconnect"               # https://infradead.org/openconnect
-brew "python@3.10"               # https://python.org
 brew "python@3.12"               # https://python.org
 brew "sheldon"                   # https://sheldon.cli.rs
 brew "trash-cli"                 # https://github.com/andreafrancia/trash-cli
@@ -25,7 +24,7 @@ brew "terminal-notifier"         # https://github.com/julienXX/terminal-notifier
 brew "tmux"                      # https://github.com/tmux/tmux/wiki
 brew "wget"                      # https://gnu.org/software/wget
 brew "zsh"                       # https://zsh.org
-brew "zsh-completions"           # https://github.com/zsh-users/zsh-completions
+brew "zoxide"                    # https://github.com/ajeetdsouza/zoxide
 
 # ------------------------------------------------------------------------------
 # Taps

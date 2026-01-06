@@ -4,7 +4,7 @@
 #   http://askubuntu.com/questions/22037/aliases-not-available-when-using-sudo
 alias sudo='sudo '
 
-# Just bcoz c shorter than clear
+# Just cuz c shorter than clear
 alias c='clear'
 
 # Go to the /home/$USER (~) directory and clears window of your terminal
