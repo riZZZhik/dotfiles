@@ -31,6 +31,11 @@ fi
 # Plugins
 # ------------------------------------------------------------------------------
 
+# Completions
+autoload -Uz compinit
+zmodload -i zsh/complist
+compinit -C
+
 # Export oh-my-zsh
 export ZSH="$HOME/.local/share/sheldon/repos/github.com/ohmyzsh/ohmyzsh"
 plugins=(
