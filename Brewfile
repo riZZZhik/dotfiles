@@ -47,7 +47,7 @@ cask "telegram"                  # https://telegram.org
 cask "zoom"                      # https://zoom.us
 
 # Development
-cask "docker"                    # https://docker.com
+cask "docker-desktop"            # https://docker.com
 # cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
 cask "iterm2"                    # https://iterm2.com
 cask "netron"                    # https://netron.app
@@ -65,11 +65,11 @@ cask "bartender"                 # https://macbartender.com
 # cask "gpg-suite"                 # https://gpgtools.org
 cask "karabiner-elements"        # https://karabiner-elements.pqrs.org
 cask "linearmouse"               # https://linearmouse.app
-cask "logi-options+"         # https://logitech.com/en-us/software/logi-options-plus.html
+cask "logi-options+"             # https://logitech.com/en-us/software/logi-options-plus.html
 cask "logitech-g-hub"            # https://logitechg.com/en-us/innovation/g-hub.html
 cask "mos"                       # https://mos.caldis.me/
 cask "raycast"                   # https://raycast.com
-cask "vivid"                     # https://getvivid.app
+cask "vivid-app"                 # https://getvivid.app
 
 # ------------------------------------------------------------------------------
 # App Store applications
@@ -81,7 +81,6 @@ mas "Pages", id: 409201541
 mas "Amphetamine", id: 937984704
 mas "Dropover", id: 1355679052
 mas "MyWallpaper", id: 1552826194
-mas "iStat Menus", id: 1319778037
 
 mas "GoodNotes", id: 1444383602
 mas "Notability", id: 360593530
