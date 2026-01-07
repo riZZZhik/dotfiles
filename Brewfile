@@ -40,8 +40,6 @@ cask "arc"                       # https://arc.net
 cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
 cask "notion"                    # https://notion.com
-cask "notion-calendar"           # https://notion.com/product/calendar
-cask "obsidian"                  # https://obsidian.md
 cask "spotify"                   # https://spotify.com
 cask "steam"                     # https://store.steampowered.com
 cask "telegram"                  # https://telegram.org
@@ -50,7 +48,7 @@ cask "zoom"                      # https://zoom.us
 
 # Development
 cask "docker"                    # https://docker.com
-cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
+# cask "jetbrains-toolbox"         # https://jetbrains.com/toolbox-app
 cask "iterm2"                    # https://iterm2.com
 cask "netron"                    # https://netron.app
 cask "visual-studio-code"        # https://code.visualstudio.com
@@ -63,12 +61,12 @@ cask "font-fira-code-nerd-font"  # https://github.com/ryanoasis/nerd-fonts/tree/
 # Utils
 cask "bartender"                 # https://macbartender.com
 # cask "betterdisplay"             # https://github.com/waydabber/BetterDisplay
-cask "cheatsheet"                # https://mediaatelier.com/CheatSheet
+# cask "cheatsheet"                # https://mediaatelier.com/CheatSheet
 # cask "gpg-suite"                 # https://gpgtools.org
 cask "karabiner-elements"        # https://karabiner-elements.pqrs.org
 cask "linearmouse"               # https://linearmouse.app
-cask "logi-options-plus"         # https://logitech.com/en-us/software/logi-options-plus.html
-# cask "logitech-g-hub"            # https://logitechg.com/en-us/innovation/g-hub.html
+cask "logi-options+"         # https://logitech.com/en-us/software/logi-options-plus.html
+cask "logitech-g-hub"            # https://logitechg.com/en-us/innovation/g-hub.html
 cask "mos"                       # https://mos.caldis.me/
 cask "raycast"                   # https://raycast.com
 cask "vivid"                     # https://getvivid.app
