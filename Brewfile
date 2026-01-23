@@ -37,6 +37,7 @@ brew "zoxide"                    # https://github.com/ajeetdsouza/zoxide
 
 # Desktop applications
 cask "arc"                       # https://arc.net
+cask "chatgpt"                   # https://chatgpt.com
 cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
 cask "notion"                    # https://notion.com
