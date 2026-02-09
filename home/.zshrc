@@ -14,9 +14,9 @@ export LANGUAGE=en_US.UTF-8
 _extend_path() {
   [[ -d "$1" ]] || return
 
-  if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
+  # if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
     export PATH="$1:$PATH"
-  fi
+  # fi
 }
 
 # Add custom bin to $PATH
