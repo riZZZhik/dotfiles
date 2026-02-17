@@ -5,6 +5,8 @@ home/.config/gh
 home/.config/iterm2
 home/.config/raycast
 home/.config/karabiner/automatic_backups
+home/.config/com.nvidia.devtools
+home/.config/NVIDIA Corporation
 
 # Editor ignores
 .idea
