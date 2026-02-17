@@ -23,6 +23,7 @@ brew "tldr"                      # https://tldr.sh
 brew "terminal-notifier"         # https://github.com/julienXX/terminal-notifier
 brew "tmux"                      # https://github.com/tmux/tmux/wiki
 brew "wget"                      # https://gnu.org/software/wget
+brew "yt-dlp"                    # https://github.com/yt-dlp/yt-dlp
 brew "zsh"                       # https://zsh.org
 brew "zoxide"                    # https://github.com/ajeetdsouza/zoxide
 
