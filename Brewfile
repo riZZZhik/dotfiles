@@ -6,6 +6,8 @@
 # ------------------------------------------------------------------------------
 brew "asitop"                    # https://github.com/tlkh/asitop
 brew "bat"                       # https://github.com/sharkdp/bat
+cask "claude-code"               # https://claude.com/product/claude-code
+cask "codex"                     # https://openai.com/codex
 brew "eza"                       # https://github.com/eza-community/eza
 brew "ffmpeg"                    # https://ffmpeg.org
 brew "fzf"                       # https://github.com/junegunn/fzf
@@ -39,6 +41,8 @@ brew "zoxide"                    # https://github.com/ajeetdsouza/zoxide
 # Desktop applications
 cask "arc"                       # https://arc.net
 cask "chatgpt"                   # https://chatgpt.com
+cask "claude"                    # https://claude.com/product/overview
+cask "codex-app"                 # https://openai.com/codex
 cask "discord"                   # https://discord.com
 cask "iina"                      # https://iina.io
 cask "notion"                    # https://notion.com
