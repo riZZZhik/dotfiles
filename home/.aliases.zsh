@@ -12,7 +12,7 @@ alias q="cd ~ && clear"
 
 # Commands Shortcuts
 alias e="$EDITOR"
-alias -g G="| grep"
+alias -g G="| rg"
 alias -- +x='chmod +x'
 alias x+='chmod +x'
 

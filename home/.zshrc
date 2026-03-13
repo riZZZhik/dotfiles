@@ -36,6 +36,14 @@ autoload -Uz compinit
 zmodload -i zsh/complist
 compinit -C
 
+# History settings
+HISTSIZE=50000
+SAVEHIST=50000
+HISTFILE="$HOME/.zsh_history"
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE  # don't save commands starting with space
+setopt SHARE_HISTORY  # share history across terminals
+
 # Export oh-my-zsh
 export ZSH="$HOME/.local/share/sheldon/repos/github.com/ohmyzsh/ohmyzsh"
 plugins=(
