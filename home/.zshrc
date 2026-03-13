@@ -120,3 +120,8 @@ fi
 if [ "$(uname)" = "Darwin" ]; then
   _source ~/.iterm2_shell_integration.zsh
 fi
+
+# Private settings
+if [ -f ~/.zshrc.private.zsh ]; then
+  source ~/.zshrc.private.zsh
+fi
