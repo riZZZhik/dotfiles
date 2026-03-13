@@ -25,17 +25,14 @@ alias term='open -a iterm.app'
 # Quick reload of zsh environment
 alias reload="source $HOME/.zshrc"
 
-# Quick jump to dotfiles
-alias dotfiles="code $DOTFILES"
-
-# My IP
-alias myip='ifconfig | sed -En "s/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p"'
-
 # Show $PATH in readable view
 alias path='echo -e ${PATH//:/\\n}'
 
-# Download file with original filename
+# Some other useful shortcuts
+alias myip='ifconfig | sed -En "s/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p"'
+alias ports='lsof -i -P -n | grep LISTEN'
 alias get="curl -O -L"
+alias sizes='du -sh * | sort -h'
 
 # Git Shortcuts
 function gud {
@@ -53,5 +50,5 @@ function gud {
 [ -d ~/Desktop ] && alias dt='cd ~/Desktop'
 [ -d ~/dev ] && alias dev='cd ~/dev'
 function mkcd {
-  command mkdir $1 && cd $1
+  command mkdir -p $1 && cd $1
 }
