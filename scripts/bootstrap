@@ -188,5 +188,14 @@ setup_macos() {
   # Show folders first
   defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
+  # Set VSCode as default for text files
+  duti -s com.microsoft.VSCode public.plain-text all
+  duti -s com.microsoft.VSCode public.data all
+  duti -s com.microsoft.VSCode public.source-code all
+  duti -s com.microsoft.VSCode public.shell-script all
+  duti -s com.microsoft.VSCode public.json all
+  duti -s com.microsoft.VSCode public.yaml all
+  duti -s com.microsoft.VSCode net.daringfireball.markdown all
+
   killall Finder
 }

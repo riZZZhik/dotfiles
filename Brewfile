@@ -10,6 +10,7 @@ cask "claude-code"               # https://claude.com/product/claude-code
 cask "codex"                     # https://openai.com/codex
 brew "delta"                     # https://github.com/dandavison/delta
 brew "duf"                       # https://github.com/muesli/duf
+brew "duti"                      # https://github.com/moretension/duti
 brew "dust"                      # https://github.com/bootandy/dust
 brew "eza"                       # https://github.com/eza-community/eza
 brew "fd"                        # https://github.com/sharkdp/fd
