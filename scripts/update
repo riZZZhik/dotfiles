@@ -54,7 +54,6 @@ main() {
 
   update_dotfiles
   update_brew
-  update_python 3.10
   update_python 3.12
   on_finish
 }
