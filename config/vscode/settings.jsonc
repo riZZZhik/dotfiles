@@ -99,7 +99,6 @@
   "gitlab.duoChat.enabled": false,
   "editor.aiStats.enabled": true,
   "chat.mcp.gallery.enabled": true,
-  "claudeCode.preferredLocation": "panel",
   "chat.disableAIFeatures": true,
 
   "[python]": {

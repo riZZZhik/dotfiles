@@ -110,6 +110,9 @@ setup-codex:
     # Each list is a TOML key path; * matches one key component.
     local_only:
       - [projects]
+      - [sandbox_workspace_write, writable_roots]
+      - [shell_environment_policy, set]
+      - [desktop, selected-avatar-id]
       - [marketplaces]
       - [notify]
       - [model_catalog_json]

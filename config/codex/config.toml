@@ -10,6 +10,8 @@ sandbox_mode = "workspace-write"
 
 [sandbox_workspace_write]
 network_access = true
+exclude_tmpdir_env_var = false
+exclude_slash_tmp = false
 
 [features]
 chronicle = true
@@ -64,6 +66,11 @@ git-pull-request-merge-method = "squash"
 reviewDelivery = "detached"
 show-context-window-usage = true
 worktree-upstream-refresh-mode = "best-effort"
+external-agent-import-sync-enabled = true
+keepRemoteControlAwakeWhilePluggedIn = true
+mac-menu-bar-enabled = false
+preventSleepWhileRunning = true
+toys-confetti-enabled = false
 
 [desktop.appearanceDarkChromeTheme]
 accent = "#cba6f7"
@@ -101,3 +108,7 @@ status_line = [
   "weekly-limit",
 ]
 status_line_use_colors = true
+
+[notice]
+hide_rate_limit_model_nudge = true
+

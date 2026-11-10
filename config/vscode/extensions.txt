@@ -4,7 +4,6 @@ adpyke.codesnap
 ahmadawais.shades-of-purple
 akamud.vscode-theme-onedark
 almenon.arepl
-anthropic.claude-code
 benjaminbenais.copilot-theme
 brian-njogu.gitlantis
 catppuccin.catppuccin-vsc
