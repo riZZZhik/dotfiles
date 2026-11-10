@@ -13,6 +13,7 @@ from pathlib import Path
 
 from . import apps
 from .config import ROOT, Stage, collect_apps, collect_packages, load, load_catalog, path
+from .detach import detach
 
 
 def run_shell(name, *args, **kwargs):
@@ -121,7 +122,7 @@ def main(argv=None, root=ROOT):
     parser = argparse.ArgumentParser(prog="./install", description=__doc__)
     parser.add_argument(
         "command",
-        choices=["install", "apply", "update", "sync", "cleanup", "link", "fork"],
+        choices=["install", "apply", "update", "sync", "cleanup", "link", "fork", "detach"],
         nargs="?",
         default="install",
     )
@@ -160,6 +161,9 @@ def main(argv=None, root=ROOT):
         return
     if args.source is not None:
         parser.error("a source directory is only valid with link")
+    if command == "detach":
+        detach(root)
+        return
     if command == "cleanup":
         run_shell("packages", "cleanup")
         print("Package caches cleaned.")

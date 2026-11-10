@@ -2,64 +2,40 @@
 
 Personal macOS setup.
 
-## Clone
+## Setup
 
 ```sh
 git clone https://github.com/riZZZhik/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
-## Customize
-
-Review these files **before installing**:
-
-| File                            | What to customize                                                             |
-| ------------------------------- | ----------------------------------------------------------------------------- |
-| `config/setup.yaml`           | Apps, macOS preferences and entire `setup-*` stages.                          |
-| `pyproject.toml`                | Personal Python libraries in `global`. Keep `installer` intact.               |
-| `.python-version`               | Default Python version, managed by uv.                                        |
-| `home/`                         | Always linked into `~/`; review every file. Existing conflicts are backed up. |
-| `config/{vscode,iterm2,codex}/` | Settings for the app stages you keep.                                         |
-
-For example, remove `spotify` from `setup-desktop.cask` to skip Spotify,
-or add `requests` to the `global` Python group. Remove a whole `setup-*` block to skip that stage.
-Removing entries does not uninstall existing software.
-
-## Install
+Before installing, review `config/setup.yaml` (apps and preferences), `home/`
+(home links), and `config/` (app settings). Python libraries are configured in
+`pyproject.toml` under `global`; keep `installer` intact.
 
 ```sh
 ./install
 ```
 
-All remaining stages run without a confirmation menu. If Command Line Tools setup
-opens, finish it and rerun. App backups go to `.private/backups/`.
-Review local changes, then commit and push them yourself.
+If Command Line Tools setup opens, finish it and rerun. Removing packages from
+configuration does not uninstall them.
 
-## Restore VS Code layout on a new machine
+## Commands
 
-Before its first sync, VS Code setup stops if a saved `config/vscode/ui-state.code-profile`
-exists. In VS Code, run **Profiles: Import Profile**, select that file, change the
-profile name to **Default**, and confirm **Replace**. This file contains only UI
-state; dotfiles manages settings, keybindings and extensions separately. Reload
-the Default profile and check the layout, then run:
+| Command | Effect |
+| --- | --- |
+| `./install apply` | Relink files and reapply settings. |
+| `./install update` | Pull changes and update configured software. |
+| `./install sync` | Sync app settings and extensions. |
+| `./install cleanup` | Clear package caches. |
+| `./install fork` | Create a GitHub fork and switch `origin`; no push. |
+| `./install link SOURCE` | Link SOURCE’s contents into `~/`. |
+| `./install detach` | Stop sync and replace both repositories' home links with local copies. |
 
-```sh
-./install apply --vscode-ui-restored
-```
+**Fresh VS Code setup:** import `config/vscode/ui-state.code-profile` using
+**Profiles: Import Profile**, name it **Default**, and confirm **Replace**.
+Reload and check the layout, then run `./install apply --vscode-ui-restored`.
 
-The acknowledgement also works with `./install sync`. It allows the first sync to
-establish the normal local extension baseline; subsequent syncs export layout
-changes normally. Machines with an existing baseline need no acknowledgement.
-If that local baseline was removed, repeat the explicit restoration/check before
-acknowledging. Import into Default: a separate “Dotfiles UI” profile is outside
-this sync adapter's scope.
-
-## Maintain
-
-- `./install apply` — relink files and reapply app settings.
-- `./install update` — pull changes and update configured software.
-- `./install cleanup` — clear package caches.
-- `./install fork` — create a GitHub fork and switch `origin`, without pushing.
-
-Only installation and updates reconcile Python and shared libraries. Other commands
-use the installed runtime; `./install --help` performs no setup.
+**Detachment:** contents, permissions and installed apps are preserved. Resolve
+reported broken links or live sockets and retry. Earlier copies remain; reruns
+are safe. Run detachment separately from installation, apply, update or sync.

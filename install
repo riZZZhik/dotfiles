@@ -5,7 +5,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 for argument in "$@"; do
   if [[ "$argument" == --help || "$argument" == -h ]]; then
     cat <<'USAGE'
-Usage: ./install [install|apply|update|sync|cleanup|link SOURCE|fork]
+Usage: ./install [install|apply|update|sync|cleanup|link SOURCE|fork|detach]
 
 Install configured stages, link dotfiles and apply settings.
 Install/update reconcile Python and libraries; other commands use the installed runtime.
