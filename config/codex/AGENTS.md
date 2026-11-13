@@ -73,16 +73,18 @@
   runtime owners when concurrency is indicated. Preserve unrelated edits, private
   state, evidence and previews. Isolate concurrent implementation in task worktrees;
   keep one writer per overlapping boundary. Serialize shared host mutations.
-- Delegate only when independent work justifies context and coordination costs.
+- Delegate when isolation or parallelism justifies startup and coordination overhead.
   Keep tiny tasks, coupled decisions and ambiguous diagnosis with the parent.
   Prefer Sol low for mechanical workers and Sol medium for debugging a specific
   hypothesis. Explicitly request supported model/effort settings; do not claim they
   took effect without confirmation. If unavailable, keep the task local or disclose
   a supported alternative before delegating.
 - Give workers a compact handoff: outcome, relevant files, constraints and approval
-  boundaries, resource ownership and acceptance checks. Require concise verification
-  evidence. Return unresolved ambiguity to the parent; prefer completion notifications
-  to repeated polling. Assess delegation by total work and rework, not worker effort alone.
+  boundaries, resource ownership and acceptance checks. Return concise results and
+  verification evidence, not full working context. Avoid duplicating the worker's
+  investigation unless evidence is insufficient or contradictory. Return unresolved
+  ambiguity to the parent; prefer completion notifications to repeated polling.
+  Assess total work and rework across agents, not parent context or worker effort alone.
 - The parent assigns one Git/index owner per checkout; workers stage or commit only
   when assigned that responsibility. Verify and commit owned work on a task branch
   unless instructed otherwise. Review staged changes, separate unrelated tasks and
