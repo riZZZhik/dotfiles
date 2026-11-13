@@ -1,5 +1,5 @@
 {
-  "workbench.colorTheme": "Catppuccin Frappé",
+  "workbench.colorTheme": "Tokyo Night",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.experimental.modernUI": false,
   "workbench.sideBar.location": "right",
@@ -170,5 +170,9 @@
   "vscord.status.problems.enabled": false,
   "vscord.status.state.text.editing": "Working on {file_name}{file_extension}",
   "vscord.status.idle.timeout": 3600,
-  "settingsSync.ignoredSettings": []
+  "yaml.schemas": {
+    "file:///Users/rizhik/.vscode/extensions/atlassian.atlascode-3.4.22/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml"
+  },
+  "settingsSync.ignoredSettings": [],
+  "editor.experimentalGpuAcceleration": "on"
 }

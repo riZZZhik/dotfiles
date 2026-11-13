@@ -209,11 +209,6 @@
     "when": "hasSymbols"
   },
   {
-    "key": "shift+cmd+,",
-    "command": "vscode.open",
-    "args": "${vscodeDir}/settings.jsonc"
-  },
-  {
     "key": "cmd+.",
     "command": "editor.action.marker.nextInFiles",
     "when": "editorFocus"
@@ -277,5 +272,9 @@
     "key": "alt+cmd+l",
     "command": "workbench.action.nextEditor",
     "when": "!terminalFocus"
+  },
+  {
+    "key": "shift+cmd+,",
+    "command": "workbench.action.openApplicationSettingsJson"
   }
 ]

@@ -34,6 +34,7 @@ jannisx11.batch-rename-extension
 jeff-hykin.better-cpp-syntax
 kevinrose.vsc-python-indent
 leonardssh.vscord
+madcatpx.explorer-exclude-manager
 mads-hartmann.bash-ide-vscode
 mechatroner.rainbow-csv
 mgesbert.python-path
@@ -69,7 +70,6 @@ njqdev.vscode-python-typehint
 oderwat.indent-rainbow
 openai.chatgpt
 openai.codex-audio
-peterschmalfeldt.explorer-exclude
 pflannery.vscode-versionlens
 pkief.material-icon-theme
 quicktype.quicktype
