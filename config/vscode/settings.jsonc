@@ -1,6 +1,10 @@
 {
+  // #region Theme
   "workbench.colorTheme": "Tokyo Night",
   "workbench.iconTheme": "material-icon-theme",
+  // #endregion
+
+  // #region Window and layout
   "workbench.experimental.modernUI": false,
   "workbench.sideBar.location": "right",
   "window.titleBarStyle": "custom",
@@ -8,17 +12,24 @@
   "window.restoreFullscreen": true,
   "window.commandCenter": false,
   "workbench.layoutControl.enabled": false,
+  // #endregion
+
+  // #region Editor font
   "editor.fontFamily": "'FiraCode Nerd Font', 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace",
   "editor.fontSize": 14,
   "editor.lineHeight": 23,
   "editor.fontLigatures": true,
+  // #endregion
+
+  // #region Cursor
   "editor.cursorStyle": "line",
   "editor.cursorBlinking": "smooth",
   "editor.cursorSmoothCaretAnimation": "on",
+  // #endregion
+
+  // #region Editor guides
   "editor.lineNumbers": "relative",
-  "editor.rulers": [
-    100
-  ],
+  "editor.rulers": [100],
   "editor.minimap.enabled": true,
   "editor.minimap.renderCharacters": false,
   "editor.minimap.autohide": "mouseover",
@@ -27,20 +38,30 @@
     "rgba(255,255,64,0.3)",
     "rgba(127,255,127,0.3)",
     "rgba(255,127,255,0.3)",
-    "rgba(79,236,236,0.3)"
+    "rgba(79,236,236,0.3)",
   ],
+  "editor.experimentalGpuAcceleration": "on",
+  // #endregion
+
+  // #region Editing
   "editor.linkedEditing": true,
   "editor.inlayHints.enabled": "offUnlessPressed",
   "editor.unicodeHighlight.ambiguousCharacters": false,
   "editor.accessibilitySupport": "off",
   "diffEditor.ignoreTrimWhitespace": false,
+  // #endregion
+
+  // #region Explorer
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
   "workbench.editorAssociations": {
     "*.wav": "wavPreview.audioPreview",
     "*.mp3": "wavPreview.audioPreview",
-    "git-rebase-todo": "gitlens.rebase"
+    "git-rebase-todo": "gitlens.rebase",
   },
+  // #endregion
+
+  // #region Files and formatting
   "files.exclude": {
     ".idea": true,
     "**/__pycache__": true,
@@ -48,13 +69,13 @@
     "**/.mypy_cache": true,
     "**/.ruff_cache": true,
     "**/.pytest_cache": true,
-    "**/*.synctex.gz": true
+    "**/*.synctex.gz": true,
   },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,
     "**/venv/**": true,
-    "**/.venv/**": true
+    "**/.venv/**": true,
   },
   "files.autoSave": "onFocusChange",
   "files.insertFinalNewline": true,
@@ -62,12 +83,19 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "files.associations": {
-    ".env*": "dotenv"
+    ".env*": "dotenv",
   },
+  // #endregion
+
+  // #region Terminal
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontFamily": "'FiraCode Nerd Font', 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace",
   "terminal.integrated.cursorStyle": "line",
   "terminal.integrated.defaultProfile.linux": "zsh",
+  "terminal.integrated.enableImages": true,
+  // #endregion
+
+  // #region Git and collaboration
   "git.autofetch": true,
   "git.detectWorktrees": true,
   "git.confirmSync": false,
@@ -77,6 +105,9 @@
   "git.replaceTagsWhenPull": true,
   "git.openRepositoryInParentFolders": "never",
   "gitlens.graph.details.location": "auto",
+  // #endregion
+
+  // #region AI assistance
   "editor.inlineSuggest.enabled": true,
   "editor.inlineSuggest.showToolbar": "always",
   "editor.inlineSuggest.edits.showCollapsed": true,
@@ -84,19 +115,22 @@
     "*": true,
     "plaintext": false,
     "markdown": true,
-    "scminput": false
+    "scminput": false,
   },
   "github.copilot.nextEditSuggestions.enabled": true,
   "gitlab.duoChat.enabled": false,
   "editor.aiStats.enabled": true,
   "chat.mcp.gallery.enabled": true,
   "chat.disableAIFeatures": true,
+  // #endregion
+
+  // #region Python and notebooks
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
       "source.organizeImports.ruff": "explicit",
-      "source.fixAll.ruff": "explicit"
-    }
+      "source.fixAll.ruff": "explicit",
+    },
   },
   "ruff.configurationPreference": "filesystemFirst",
   "python.analysis.autoFormatStrings": true,
@@ -109,70 +143,77 @@
   "python.analysis.inlayHints.callArgumentNames": "partial",
   "python.createEnvironment.trigger": "off",
   "jupyter.askForKernelRestart": false,
+  // #endregion
+
+  // #region C++, Go and LaTeX
   "[cpp]": {
-    "editor.defaultFormatter": "ms-vscode.cpptools"
+    "editor.defaultFormatter": "ms-vscode.cpptools",
   },
   "C_Cpp.clang_format_fallbackStyle": "Google",
   "C_Cpp.clang_format_sortIncludes": true,
   "go.toolsManagement.autoUpdate": true,
+  // #endregion
+
+  // #region YAML and TOML
   "[yaml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml",
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
   },
-  "yaml.customTags": [
-    "!reference sequence"
-  ],
+  "yaml.customTags": ["!reference sequence"],
   "[toml]": {
-    "editor.defaultFormatter": "tamasfe.even-better-toml"
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
   },
+  "yaml.schemas": {
+    "file:///Users/rizhik/.vscode/extensions/atlassian.atlascode-3.4.22/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml",
+  },
+  // #endregion
+
+  // #region Language overrides
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers",
   },
   "[shellscript]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
+    "editor.defaultFormatter": "foxundermoon.shell-format",
   },
   "[dotenv]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
+    "editor.defaultFormatter": "foxundermoon.shell-format",
   },
   "[ignore]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
+    "editor.defaultFormatter": "foxundermoon.shell-format",
   },
   "[properties]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
+    "editor.defaultFormatter": "foxundermoon.shell-format",
   },
   "[proto3]": {
-    "editor.defaultFormatter": "DrBlury.protobuf-vsc"
+    "editor.defaultFormatter": "DrBlury.protobuf-vsc",
   },
+  // #endregion
+
+  // #region Markdown and diagnostics
   "[markdown]": {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
   },
   "markdownlint.config": {
-    "MD024": false
+    "MD024": false,
   },
   "markdown.extension.toc.levels": "2..6",
   "markdown.extension.toc.omittedFromToc": {
-    "README.md": [
-      "## Table of Contents"
-    ]
+    "README.md": ["## Table of Contents"],
   },
   "errorLens.enabled": true,
-  "errorLens.enabledDiagnosticLevels": [
-    "error",
-    "warning"
-  ],
-  "errorLens.excludeBySource": [
-    "cSpell"
-  ],
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
+  "errorLens.excludeBySource": ["cSpell"],
   "todo-tree.highlights.enabled": false,
   "security.workspace.trust.untrustedFiles": "open",
   "security.promptForRemoteFileProtocolHandling": false,
+  // #endregion
+
+  // #region Extensions and sync
   "redhat.telemetry.enabled": true,
   "vscord.status.problems.enabled": false,
   "vscord.status.state.text.editing": "Working on {file_name}{file_extension}",
   "vscord.status.idle.timeout": 3600,
-  "yaml.schemas": {
-    "file:///Users/rizhik/.vscode/extensions/atlassian.atlascode-3.4.22/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml"
-  },
-  "settingsSync.ignoredSettings": [],
-  "editor.experimentalGpuAcceleration": "on"
+  "settingsSync.ignoredSettings": [
+  ],
+  // #endregion
 }

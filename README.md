@@ -99,6 +99,17 @@ and home paths are excluded from public settings. They go to the configured priv
 repository when available, otherwise `~/.local/state/dotfiles/vscode/settings.local.jsonc`.
 Machine-specific keybindings are saved alongside it as `keybindings.local.json`.
 
+VS Code exports retain comments, blank lines and entry order from the live JSONC
+files. Folding regions are kept around the entries present in each split. Private
+entries take their attached comments to the local files; comments containing known
+private values, credential markers or local paths are removed from public exports.
+An owner-only local history at `~/.local/state/dotfiles/vscode/comment-redactions.json`
+retains private identifiers for redaction after settings are deleted; it is never
+imported into apps or exported to Git. Invalid history stops export.
+Unattached document headers and footers are omitted from public splits. Invalid or
+duplicate-key input leaves existing exports intact. The daemon never edits the live
+files; the initial preset installation still merges settings into a new JSON file.
+
 Each iTerm export captures portable native preferences and all profiles, including
 dynamic profile definitions. It needs no preset template and captures new settings
 and deletions. Public profile references use portable IDs. Commands, host bindings,

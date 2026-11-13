@@ -1,4 +1,5 @@
 [
+  // #region Vim
   {
     "key": "escape",
     "command": "-extension.vim_escape",
@@ -9,6 +10,9 @@
     "command": "extension.vim_escape",
     "when": "editorTextFocus && !inDebugRepl && !suggestWidgetVisible"
   },
+  // #endregion
+
+  // #region Debugging
   {
     "key": "shift+cmd+enter",
     "command": "workbench.action.debug.selectandstart",
@@ -19,6 +23,9 @@
     "command": "workbench.action.debug.start",
     "when": "debuggersAvailable && debugState == 'inactive'"
   },
+  // #endregion
+
+  // #region LaTeX
   {
     "key": "alt+cmd+b",
     "command": "-latex-workshop.build",
@@ -34,15 +41,24 @@
     "command": "latex-workshop.build",
     "when": "!config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId =~ /^latex$|^latex-expl3$|^rsweave$|^jlweave$|^pweave$/"
   },
+  // #endregion
+
+  // #region Quick Open
   {
     "key": "shift shift",
     "command": "workbench.action.quickOpen"
   },
+  // #endregion
+
+  // #region Rename
   {
     "key": "cmd+m",
     "command": "editor.action.rename",
     "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
   },
+  // #endregion
+
+  // #region Code actions
   {
     "key": "alt+enter",
     "command": "-debug.openBreakpointToSide",
@@ -68,6 +84,9 @@
     "command": "acceptSelectedCodeAction",
     "when": "codeActionMenuVisible"
   },
+  // #endregion
+
+  // #region Workbench views
   {
     "key": "cmd+b",
     "command": "-workbench.action.toggleSidebarVisibility"
@@ -100,6 +119,9 @@
     "key": "cmd+2",
     "command": "workbench.view.scm"
   },
+  // #endregion
+
+  // #region Terminal windows
   {
     "key": "shift+cmd+c",
     "command": "-workbench.action.terminal.openNativeConsole",
@@ -115,6 +137,9 @@
     "command": "workbench.action.terminal.new",
     "when": "terminalProcessSupported || terminalWebExtensionContributedProfile"
   },
+  // #endregion
+
+  // #region Terminal panes
   {
     "key": "alt+cmd+l",
     "command": "workbench.action.terminal.focusNextPane",
@@ -125,6 +150,9 @@
     "command": "workbench.action.terminal.focusPreviousPane",
     "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
   },
+  // #endregion
+
+  // #region Terminal management
   {
     "key": "cmd+k",
     "command": "-workbench.action.terminal.clear",
@@ -140,6 +168,9 @@
     "command": "workbench.action.terminal.kill",
     "when": "terminalFocus"
   },
+  // #endregion
+
+  // #region Terminal navigation
   {
     "key": "alt+cmd+left",
     "command": "workbench.action.terminal.focusPreviousPane",
@@ -160,6 +191,9 @@
     "command": "workbench.action.terminal.focusNext",
     "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
   },
+  // #endregion
+
+  // #region Terminal input
   {
     "key": "shift+enter",
     "command": "workbench.action.terminal.sendSequence",
@@ -168,6 +202,9 @@
     },
     "when": "terminalFocus"
   },
+  // #endregion
+
+  // #region Definitions and references
   {
     "key": "f12",
     "command": "-editor.action.revealDefinition",
@@ -207,6 +244,13 @@
     "key": "cmd+b",
     "command": "editor.gotoNextSymbolFromResult",
     "when": "hasSymbols"
+  },
+  // #endregion
+
+  // #region Editor navigation
+  {
+    "key": "shift+cmd+,",
+    "command": "workbench.action.openApplicationSettingsJson"
   },
   {
     "key": "cmd+.",
@@ -272,9 +316,6 @@
     "key": "alt+cmd+l",
     "command": "workbench.action.nextEditor",
     "when": "!terminalFocus"
-  },
-  {
-    "key": "shift+cmd+,",
-    "command": "workbench.action.openApplicationSettingsJson"
   }
+  // #endregion
 ]

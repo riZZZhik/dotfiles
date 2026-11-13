@@ -55,6 +55,140 @@ class VSCodeSyncTests(unittest.TestCase):
             if p.is_file()
         }
 
+    def test_commented_splits_preserve_layout_regions_and_private_boundaries(self):
+        (self.shared / "extras.jsonc").write_text('{"window.title":"old"}')
+        self.adapter.PRIVATE.parent.mkdir()
+        self.adapter.PRIVATE.write_text(
+            '{"company.option":"old","company.retired":"retired-identifier",'
+            '"http.proxySupport":"on"}'
+        )
+        source = """{
+  // #region Editor appearance
+  // Machine-only note
+  "company.option": "private-identifier", // machine-only inline note
+
+  // Keep this paragraph.
+  "editor.fontSize": 18, // Public inline note
+
+  // A private-identifier must not appear in this public comment.
+  // retired-identifier
+  "editor.fontFamily": "Fixture Mono",
+  // #endregion
+
+  // #region Window appearance
+  "window.title": "Fixture title",
+  // #endregion
+
+  // #region Credentials
+  // credential-only note
+  "extension.apiKey": "synthetic-secret",
+  // #endregion
+
+  // Filtering also keeps retained array-item comments.
+  "settingsSync.ignoredSettings": [
+    "company.option", // private-identifier
+    // Keep this item.
+    "public.option"
+  ]
+}
+"""
+        (self.adapter.USER / "settings.json").write_text(source)
+        (self.adapter.USER / "keybindings.json").write_text("""[
+  // #region Shortcuts
+  // Machine shortcut note
+  {"key":"ctrl+x","command":"fixture.private","args":"/Users/fixture/private"},
+
+  // Editor shortcut note
+  {"key":"ctrl+k", "command":"fixture.public"}, // Public shortcut inline note
+  // #endregion
+]
+""")
+        before = self.snapshot_app()
+        self.adapter.sync()
+        self.assertEqual(before, self.snapshot_app())
+        main = (self.shared / "settings.jsonc").read_text()
+        extras = (self.shared / "extras.jsonc").read_text()
+        shortcuts = (self.shared / "keybindings.json").read_text()
+        private = self.adapter.PRIVATE.read_text()
+        for text in (main, extras, shortcuts):
+            self.assertEqual(text.count("// #region"), text.count("// #endregion"))
+            for excluded in (
+                "private-identifier",
+                "retired-identifier",
+                "synthetic-secret",
+                "Machine-only note",
+                "machine-only inline note",
+                "credential-only note",
+                "Machine shortcut note",
+                "Credentials",
+                "/Users/fixture",
+                "company.option",
+            ):
+                self.assertNotIn(excluded, text)
+        self.assertIn("// #region Editor appearance", main)
+        self.assertIn(
+            '// Keep this paragraph.\n  "editor.fontSize": 18, // Public inline note', main
+        )
+        self.assertIn("\n\n", main)
+        self.assertIn('// Keep this item.\n    "public.option"', main)
+        self.assertIn("// #region Window appearance", extras)
+        self.assertIn('"window.title": "Fixture title"', extras)
+        self.assertIn("synthetic-secret", private)
+        self.assertIn("// Machine-only note", private)
+        self.assertIn("// credential-only note", private)
+        self.assertEqual(json5.loads(private)["company.option"], "private-identifier")
+        self.assertIn("// Editor shortcut note", shortcuts)
+        self.assertIn('{"key":"ctrl+k", "command":"fixture.public"}', shortcuts)
+        local = self.state / "vscode/keybindings.local.json"
+        self.assertIn("// Machine shortcut note", local.read_text())
+        self.assertEqual(local.stat().st_mode & 0o777, 0o600)
+        redactions = self.state / "vscode/comment-redactions.json"
+        self.assertEqual(redactions.stat().st_mode & 0o777, 0o600)
+        self.assertIn("retired-identifier", json.loads(redactions.read_text()))
+        self.assertEqual(self.adapter.PRIVATE.stat().st_mode & 0o777, 0o600)
+        outputs = [*(self.shared.iterdir()), self.adapter.PRIVATE, local]
+        saved = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in outputs if p.is_file()}
+        self.adapter.sync()
+        self.assertEqual(saved, {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in saved})
+        self.adapter.copy_settings()
+        self.assertEqual(len(json5.loads((self.adapter.USER / "keybindings.json").read_text())), 2)
+
+    def test_invalid_redaction_history_does_not_publish_comments(self):
+        redactions = self.state / "vscode/comment-redactions.json"
+        redactions.parent.mkdir(parents=True)
+        redactions.write_text('{"unexpected":"shape"}')
+        before = {p: p.read_bytes() for p in self.shared.iterdir()}
+        with self.assertRaisesRegex(ValueError, "redaction history"):
+            self.adapter.sync()
+        self.assertEqual(before, {p: p.read_bytes() for p in self.shared.iterdir()})
+
+    def test_invalid_or_duplicate_source_keeps_existing_exports(self):
+        for name, source in (
+            ("settings.json", '{"extension.apiKey":"first", "extension.apiKey":"second"}'),
+            ("settings.json", '{"editor.fontSize":18, broken'),
+            ("keybindings.json", '[{"key":"ctrl+k","command":"first","command":"second"}]'),
+            ("settings.local.jsonc", '{"extension.apiKey":"first","extension.apiKey":"second"}'),
+            ("extras.jsonc", '{"window.title":"first","window.title":"second"}'),
+        ):
+            with self.subTest(name=name, source=source):
+                (self.adapter.USER / "settings.json").write_text("{}")
+                (self.adapter.USER / "keybindings.json").write_text("[]")
+                self.adapter.PRIVATE.unlink(missing_ok=True)
+                (self.shared / "extras.jsonc").write_text("{}")
+                target = (
+                    self.adapter.PRIVATE
+                    if name == "settings.local.jsonc"
+                    else self.shared / name
+                    if name == "extras.jsonc"
+                    else self.adapter.USER / name
+                )
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(source)
+                before = {p: p.read_bytes() for p in self.shared.iterdir()}
+                with self.assertRaisesRegex(ValueError, "Invalid JSONC"):
+                    self.adapter.sync()
+                self.assertEqual(before, {p: p.read_bytes() for p in self.shared.iterdir()})
+
     def test_export_updates_repository_and_preserves_app_and_private_values(self):
         (self.shared / "settings.jsonc").write_text('{"obsolete":true,"editor.fontSize":12}')
         (self.shared / "extras.jsonc").write_text('{"window.title":"old"}')

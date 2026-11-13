@@ -122,3 +122,5 @@ if command -v atuin >/dev/null 2>&1; then
   export ATUIN_CONFIG_DIR="$HOME/.config/atuin"
   eval "$(atuin init zsh --disable-up-arrow --disable-ai)"
 fi
+
+fpath+=~/.zfunc; autoload -Uz compinit; compinit

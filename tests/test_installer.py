@@ -583,7 +583,16 @@ class InstallerTests(unittest.TestCase):
             ],
             "Default Bookmark Guid": "local-guid",
         }
-        with patch.object(iterm, "load_theme", return_value={}):
+        shared = self.root / "iterm-fixture"
+        shared.mkdir()
+        (shared / "settings.json").write_text(
+            '{"Theme":"Fixture","Profile":{},"Hotkey":{"Has Hotkey":false},'
+            '"Global":{},"Remote":{"Guid":"fixture-remote","Name":"Remote"}}'
+        )
+        with (
+            patch.object(iterm, "load_theme", return_value={}),
+            patch.object(iterm, "SHARED", shared),
+        ):
             result, profiles = iterm.build_preferences(original)
         self.assertEqual(result["New Bookmarks"][0]["Guid"], "local-guid")
         self.assertEqual(result["New Bookmarks"][0]["Keyboard Map"]["personal"], {"Action": 1})

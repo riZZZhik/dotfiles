@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -13,6 +14,7 @@ import json5
 
 from ..config import path
 from .base import STATE, App, write_if_changed
+from .jsonc import Document
 
 
 class VSCode(App):
@@ -62,7 +64,7 @@ class VSCode(App):
         if local_bindings.exists():
             keybindings = (
                 json.dumps(
-                    json5.loads(keybindings) + json.loads(local_bindings.read_text()), indent=2
+                    json5.loads(keybindings) + json5.loads(local_bindings.read_text()), indent=2
                 )
                 + "\n"
             )
@@ -91,12 +93,18 @@ class VSCode(App):
             raise FileNotFoundError(
                 "VS Code settings or extension inventory is missing; keeping exports."
             )
-        settings = self.read_jsonc(settings_file)
+        settings_document = Document(settings_file.read_text())
+        settings = settings_document.value
+        if not isinstance(settings, dict):
+            raise TypeError("VS Code settings must be an object.")
         installed = self.read_installed_extensions()
         bindings = self.USER / "keybindings.json"
         text = bindings.read_text() if bindings.exists() else "[]"
         text = text.replace(self.SHARED.as_uri(), "${vscodeDir}")
-        all_bindings = json5.loads(text)
+        bindings_document = Document(text)
+        all_bindings = bindings_document.value
+        if not isinstance(all_bindings, list):
+            raise TypeError("VS Code keybindings must be an array.")
         keybindings = [item for item in all_bindings if not self.local_data(item)]
         local_bindings = [item for item in all_bindings if self.local_data(item)]
         values = {}
@@ -121,27 +129,84 @@ class VSCode(App):
             ]
         extras_file = self.SHARED / "extras.jsonc"
         extras_keys = set(self.read_jsonc(extras_file)) if extras_file.exists() else set()
-        for filename, data in (
-            ("settings.jsonc", {k: v for k, v in public.items() if k not in extras_keys}),
-            ("extras.jsonc", {k: v for k, v in public.items() if k in extras_keys}),
-            ("keybindings.json", keybindings),
-        ):
-            write_if_changed(
-                self.SHARED / filename, json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+        local_settings = {key: settings[key] for key in settings if key in local_keys}
+        private_literals = set(local_keys)
+        redactions_file = STATE / "vscode/comment-redactions.json"
+        if redactions_file.exists():
+            try:
+                history = json.loads(redactions_file.read_text())
+                if not isinstance(history, list) or any(
+                    not isinstance(value, str) or not value for value in history
+                ):
+                    raise ValueError
+                private_literals.update(history)
+            except ValueError:
+                raise ValueError(
+                    "Invalid local comment redaction history; export stopped."
+                ) from None
+
+        def collect_private(value, *, sensitive=False):
+            if isinstance(value, str) and value:
+                # Enum values are not private identifiers ("on" also occurs in #region).
+                if sensitive or value not in {
+                    "on",
+                    "off",
+                    "auto",
+                    "always",
+                    "never",
+                    "default",
+                    "none",
+                    "true",
+                    "false",
+                    "yes",
+                    "no",
+                    "linux",
+                    "windows",
+                    "osx",
+                    "macos",
+                }:
+                    private_literals.add(value)
+            elif isinstance(value, dict):
+                for key, item in value.items():
+                    if key not in {"key", "command", "when", "args"}:
+                        private_literals.add(key)
+                    collect_private(item, sensitive=sensitive or self.sensitive_key(key))
+            elif isinstance(value, list):
+                for item in value:
+                    collect_private(item, sensitive=sensitive)
+
+        collect_private(local_settings)
+        collect_private(local_bindings)
+        collect_private(private)
+
+        def safe_comment(comment):
+            return not (
+                self.sensitive_key(comment)
+                or "credential" in comment.casefold()
+                or self.local_data(comment)
+                or re.search(r"(?:~|file:)?/(?:Users|Volumes|private|opt|home|tmp)/", comment)
+                or any(value in comment for value in private_literals)
             )
+
+        # Render every split before writing: invalid source must preserve existing exports.
+        exports = {
+            # Persist privacy history before publishing any public output.
+            redactions_file: json.dumps(sorted(private_literals), ensure_ascii=False) + "\n",
+            self.SHARED / "settings.jsonc": settings_document.project(
+                {k: v for k, v in public.items() if k not in extras_keys}, safe_comment
+            ),
+            extras_file: settings_document.project(
+                {k: v for k, v in public.items() if k in extras_keys}, safe_comment
+            ),
+            self.SHARED / "keybindings.json": bindings_document.project(keybindings, safe_comment),
+        }
         if local_keys or private_file.exists():
-            write_if_changed(
-                private_file,
-                json.dumps(
-                    {key: settings[key] for key in settings if key in local_keys},
-                    indent=2,
-                    ensure_ascii=False,
-                )
-                + "\n",
-            )
+            exports[private_file] = settings_document.project(local_settings)
         local_bindings_file = STATE / "vscode/keybindings.local.json"
         if local_bindings or local_bindings_file.exists():
-            write_if_changed(local_bindings_file, json.dumps(local_bindings, indent=2) + "\n")
+            exports[local_bindings_file] = bindings_document.project(local_bindings)
+        for destination, content in exports.items():
+            write_if_changed(destination, content)
         write_if_changed(
             self.SHARED / "extensions.txt",
             "# Exported from local VS Code.\n" + "\n".join(sorted(installed)) + "\n",
@@ -165,7 +230,12 @@ class VSCode(App):
         write_if_changed(destination, json.dumps(profile, indent=2, ensure_ascii=False) + "\n")
 
     def read_jsonc(self, file: Path) -> dict[str, Any]:
-        return json5.loads(file.read_text())
+        try:
+            return json5.loads(file.read_text(), allow_duplicate_keys=False)
+        except ValueError:
+            raise ValueError(
+                "Invalid JSONC configuration; existing exports were not replaced."
+            ) from None
 
     def read_installed_extensions(self) -> set[str]:
         return (
