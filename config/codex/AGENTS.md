@@ -34,9 +34,10 @@
 
 ## Design and implementation
 
-- Read only relevant guidance and source. Treat existing code, docs and tests as
-  evidence to evaluate, not requirements to preserve automatically. Identify one
-  owner for each behavior and trace its callers before changing boundaries.
+- Search before reading; open only relevant guidance and source. Batch independent
+  reads and checks; return relevant excerpts or summaries rather than full logs.
+  Treat existing code, docs and tests as evidence, not requirements to preserve.
+  Identify one owner for each behavior and trace callers before changing boundaries.
 - Compare retaining, simplifying, replacing and removing behavior. Prefer standard
   tools and mature, maintained libraries over custom implementations when they reduce
   total complexity. Justify custom code when a suitable option exists; retain it when
@@ -63,11 +64,11 @@
   now, and what remains before handoff. Reuse the agreed plan; keep progress in
   chat without tracking files or extra tool calls. Give a remaining-time range
   only when grounded in evidence, and revise it when uncertainty changes.
-- Before substantial work, check model/effort and environment suitability. Recommend
-  a specific setting only when the gain justifies interruption; do not infer active
-  settings from defaults. Reassess after material scope changes or repeated reasoning
-  failures. Use the cheapest experiment that can change the decision; state expected
-  effort for costly work.
+- The user prefers Sol high for hard tasks. Before substantial work, check active
+  model/effort and environment suitability; do not infer settings from defaults.
+  Recommend a change only when the gain justifies interruption. Reassess after
+  material scope changes or repeated reasoning failures. Use the cheapest experiment
+  that can change the decision; state expected effort for costly work.
 - When attempts stop adding evidence, failures undermine the approach or effort
   materially increases,
   report elapsed time, the blocker and the cheapest next option. Discuss alternatives
@@ -82,7 +83,8 @@
   meaningful regression risks, not merely because code changed.
   When automation requires disproportionate scaffolding, propose a concrete manual
   check, including user review where useful, and state what remains unverified.
-- Reuse valid evidence. Rerun checks for relevant edits, failures or missing coverage.
+- Reuse findings and passing checks while their inputs remain unchanged; revisit
+  them for relevant edits, failures, contradictory evidence or missing coverage.
   Agree before reducing promised verification. Keep costly or remote checks explicit
   and within authorized resources; static checks do not establish runtime or device
   behavior. When reported behavior contradicts source or test expectations, investigate
@@ -101,10 +103,14 @@
   unrelated edits, private state, evidence and running previews. Use a separate task
   worktree for concurrent implementation; keep one writer per overlapping boundary
   and one index/integration owner per checkout. Serialize shared host mutations.
-- After agreeing the plan, delegate independent work when the expected benefit
-  outweighs coordination cost. Keep coupled decisions with one owner; prefer parallel
-  tool calls for small operations. Give workers bounded outcomes and exclusive
-  ownership; each owner verifies behavior and shares reusable evidence.
+- After plan approval, delegate only when independent work justifies duplicated
+  context and coordination. Keep tiny tasks, coupled decisions and ambiguous diagnosis
+  with the parent; batch independent tool calls. Use Sol low workers for clear
+  mechanical edits and Sol medium workers for bounded debugging of a specific
+  hypothesis. Give workers narrow task context rather than full chat history,
+  bounded outcomes and exclusive ownership; require concise verification evidence.
+  Return unresolved ambiguity to the parent instead of repeating low-effort attempts.
+  Prefer completion notifications to repeated status polling.
 - Verify and commit owned work on a task branch unless instructed otherwise. Follow
   repository commit style. Describe the result in commit titles instead of repeating
   the requested action or the action already expressed by a commit prefix. Review
