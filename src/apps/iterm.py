@@ -14,7 +14,7 @@ from urllib.parse import quote
 from urllib.request import urlopen
 
 from ..config import path
-from .base import STATE, App, write_if_changed
+from .base import STATE, App, write_if_changed, write_json_if_changed
 
 
 class ITerm(App):
@@ -92,10 +92,7 @@ class ITerm(App):
             STATE / "iterm/preferences.plist", plistlib.dumps(original, fmt=plistlib.FMT_BINARY)
         )
         portable = self.portable(original, guids)
-        write_if_changed(
-            self.SHARED / "settings.json",
-            json.dumps({"Preferences": portable}, indent=2, ensure_ascii=False) + "\n",
-        )
+        write_json_if_changed(self.SHARED / "settings.json", {"Preferences": portable})
 
     def portable(self, data, guids: dict[str, str], key=""):
         if isinstance(data, dict):

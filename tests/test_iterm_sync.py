@@ -135,6 +135,18 @@ class ITermSyncTests(unittest.TestCase):
         self.assertEqual(before, (self.shared / "settings.json").stat().st_mtime_ns)
         self.assertFalse((self.state / "iterm/installed").exists())
 
+    def test_equal_export_preserves_formatting_order_and_modification_time(self):
+        self.adapter.sync()
+        target = self.shared / "settings.json"
+        values = json.loads(target.read_text())
+        target.write_text(json.dumps(values, sort_keys=True, separators=(",", ":")))
+        before = (target.read_bytes(), target.stat().st_mtime_ns)
+        self.adapter.sync()
+        self.assertEqual(before, (target.read_bytes(), target.stat().st_mtime_ns))
+        self.native["TabViewType"] = 0
+        self.adapter.sync()
+        self.assertEqual(json.loads(target.read_text())["Preferences"]["TabViewType"], 0)
+
     def test_machine_state_stays_in_local_snapshot_and_survives_preset_import(self):
         machine = {
             "NoSyncRecordedVariables": {"hostname": "fixture-machine"},

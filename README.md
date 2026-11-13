@@ -94,6 +94,8 @@ and confirm **Replace**. The initial layout is saved at
 `.private/backups/vscode/initial-ui-state.code-profile`; no restoration gate is required.
 
 VS Code exports settings, keybindings, installed extensions and selected UI layout.
+Repeated exports preserve unchanged files and modification times. Codex and iTerm
+also retain existing export formatting when preference values already match.
 Existing private overrides, credential-named fields, remote SSH/environment settings
 and home paths are excluded from public settings. They go to the configured private
 repository when available, otherwise `~/.local/state/dotfiles/vscode/settings.local.jsonc`.

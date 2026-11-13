@@ -11,6 +11,31 @@ from src.apps.codex import Codex
 
 
 class CodexSyncTests(unittest.TestCase):
+    def test_equal_adoption_and_sync_preserve_shared_comments_and_formatting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shared, target = root / "shared.toml", root / "local.toml"
+            shared.write_text('# Keep this comment\nmodel = "fixture"\n')
+            target.write_text('model="fixture"\n[projects.local]\ntrust_level="trusted"\n')
+            settings = {
+                "shared": str(shared),
+                "destination": str(target),
+                "baseline": str(root / "baseline"),
+                "backups": str(root / "backups"),
+                "local_only": [["projects"]],
+            }
+            with patch("src.apps.base.load", return_value=settings):
+                adapter = Codex()
+            before = (shared.read_bytes(), shared.stat().st_mtime_ns)
+            adapter.adopt_settings()
+            adapter.sync()
+            self.assertEqual(before, (shared.read_bytes(), shared.stat().st_mtime_ns))
+            self.assertFalse((root / "backups").exists())
+            target.write_text('model="changed"\n[projects.local]\ntrust_level="trusted"\n')
+            adapter.sync()
+            self.assertEqual(tomlkit.parse(shared.read_text())["model"], "changed")
+            self.assertNotIn("projects", tomlkit.parse(shared.read_text()))
+
     def test_merge_preserves_local_state_and_rerun_is_unchanged(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import tempfile
@@ -9,6 +10,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
+
+import json5
 
 from ..config import load, path
 
@@ -43,6 +46,18 @@ def write_if_changed(target: Path, content: str | bytes, backups: Path | None = 
         os.replace(temporary, target)
     finally:
         Path(temporary).unlink(missing_ok=True)
+
+
+def write_json_if_changed(target: Path, values: Any) -> None:
+    """Preserve existing JSON/JSONC formatting when exported values already match."""
+    if target.exists():
+        try:
+            if json5.loads(target.read_text()) == values:
+                write_if_changed(target, target.read_bytes())
+                return
+        except ValueError:
+            pass
+    write_if_changed(target, json.dumps(values, indent=2, ensure_ascii=False) + "\n")
 
 
 class App(ABC):

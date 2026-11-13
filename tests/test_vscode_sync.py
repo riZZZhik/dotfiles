@@ -256,6 +256,55 @@ class VSCodeSyncTests(unittest.TestCase):
                 self.assertEqual(before, {p: p.read_bytes() for p in self.shared.iterdir()})
                 missing.write_bytes(original)
 
+    def test_equal_exports_preserve_comments_order_and_modification_times(self):
+        (self.adapter.USER / "settings.json").write_text(
+            '{"editor.fontSize":14,"editor.fontFamily":"Fixture"}'
+        )
+        settings = self.shared / "settings.jsonc"
+        settings.write_text(
+            '// Keep this comment\n{ "editor.fontFamily": "Fixture", "editor.fontSize": 14 }\n'
+        )
+        bindings = self.shared / "keybindings.json"
+        bindings.write_text("[ ]\n")
+        extensions = self.shared / "extensions.txt"
+        extensions.write_text("# Keep this inventory comment\nB.Extension\na.extension\n")
+        self.adapter.EXTENSIONS.write_text(
+            '[{"identifier":{"id":"a.extension"}}, {"identifier":{"id":"b.extension"}}]'
+        )
+        # JSONC now follows the source document's formatting and privacy filter.
+        # Capture its first export, then verify that a repeat is unchanged.
+        self.adapter.sync()
+        files = [settings, bindings, extensions, self.shared / "extras.jsonc"]
+        before = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in files}
+        app = self.snapshot_app()
+        self.adapter.sync()
+        self.assertEqual(before, {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in files})
+        self.assertEqual(app, self.snapshot_app())
+        (self.adapter.USER / "settings.json").write_text('{"editor.fontSize":16}')
+        self.adapter.sync()
+        self.assertEqual(json5.loads(settings.read_text()), {"editor.fontSize": 16})
+
+    def test_equal_layout_preserves_nested_json_formatting(self):
+        storage = {"workbench.panel.alignment": "left"}
+        self.profile.write_text(
+            json.dumps(
+                {"globalState": json.dumps({"storage": storage}, indent=4), "name": "Dotfiles UI"}
+            )
+        )
+        before = (self.profile.read_bytes(), self.profile.stat().st_mtime_ns)
+        values = {
+            "__$__targetStorageMarker": json.dumps({"workbench.panel.alignment": 0}),
+            **storage,
+        }
+        self.adapter.export_ui_state(values, self.profile)
+        self.assertEqual(before, (self.profile.read_bytes(), self.profile.stat().st_mtime_ns))
+        values["workbench.panel.alignment"] = "right"
+        self.adapter.export_ui_state(values, self.profile)
+        self.assertEqual(
+            json.loads(json.loads(self.profile.read_text())["globalState"])["storage"],
+            {"workbench.panel.alignment": "right"},
+        )
+
     def test_copy_once_retains_unrelated_extensions_and_backs_up_layout(self):
         (self.shared / "settings.jsonc").write_text('{"editor.fontSize":18}')
         self.adapter.PRIVATE.parent.mkdir()

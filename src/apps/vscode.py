@@ -13,7 +13,7 @@ from typing import Any
 import json5
 
 from ..config import path
-from .base import STATE, App, write_if_changed
+from .base import STATE, App, write_if_changed, write_json_if_changed
 from .jsonc import Document
 
 
@@ -207,10 +207,21 @@ class VSCode(App):
             exports[local_bindings_file] = bindings_document.project(local_bindings)
         for destination, content in exports.items():
             write_if_changed(destination, content)
-        write_if_changed(
-            self.SHARED / "extensions.txt",
-            "# Exported from local VS Code.\n" + "\n".join(sorted(installed)) + "\n",
+        extensions_file = self.SHARED / "extensions.txt"
+        exported = (
+            {
+                line.strip().lower()
+                for line in extensions_file.read_text().splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            }
+            if extensions_file.exists()
+            else None
         )
+        if exported != installed:
+            write_if_changed(
+                extensions_file,
+                "# Exported from local VS Code.\n" + "\n".join(sorted(installed)) + "\n",
+            )
         if values:
             self.export_ui_state(values, self.SHARED / "ui-state.code-profile")
 
@@ -227,7 +238,14 @@ class VSCode(App):
             )
         }
         profile = {"name": "Dotfiles UI", "globalState": json.dumps({"storage": storage})}
-        write_if_changed(destination, json.dumps(profile, indent=2, ensure_ascii=False) + "\n")
+        if destination.exists():
+            try:
+                existing = json.loads(destination.read_text())
+                if json.loads(existing.get("globalState", "{}")) == {"storage": storage}:
+                    profile["globalState"] = existing["globalState"]
+            except (ValueError, TypeError, AttributeError):
+                pass
+        write_json_if_changed(destination, profile)
 
     def read_jsonc(self, file: Path) -> dict[str, Any]:
         try:

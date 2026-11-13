@@ -94,7 +94,8 @@ class Codex(App):
             )
         values = self.portable(tomlkit.parse(destination.read_text()))
         content = tomlkit.dumps(values)
-        write_if_changed(self.SHARED, content)
+        if not self.SHARED.exists() or tomlkit.parse(self.SHARED.read_text()) != values:
+            write_if_changed(self.SHARED, content)
         write_if_changed(path(self.CONFIG["baseline"]), content)
 
     def sync(self):
