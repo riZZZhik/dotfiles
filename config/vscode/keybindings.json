@@ -9,7 +9,6 @@
     "command": "extension.vim_escape",
     "when": "editorTextFocus && !inDebugRepl && !suggestWidgetVisible"
   },
-
   {
     "key": "shift+cmd+enter",
     "command": "workbench.action.debug.selectandstart",
@@ -20,7 +19,6 @@
     "command": "workbench.action.debug.start",
     "when": "debuggersAvailable && debugState == 'inactive'"
   },
-
   {
     "key": "alt+cmd+b",
     "command": "-latex-workshop.build",
@@ -36,18 +34,15 @@
     "command": "latex-workshop.build",
     "when": "!config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId =~ /^latex$|^latex-expl3$|^rsweave$|^jlweave$|^pweave$/"
   },
-
   {
     "key": "shift shift",
     "command": "workbench.action.quickOpen"
   },
-
   {
     "key": "cmd+m",
     "command": "editor.action.rename",
     "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
   },
-
   {
     "key": "alt+enter",
     "command": "-debug.openBreakpointToSide",
@@ -73,7 +68,6 @@
     "command": "acceptSelectedCodeAction",
     "when": "codeActionMenuVisible"
   },
-
   {
     "key": "cmd+b",
     "command": "-workbench.action.toggleSidebarVisibility"
@@ -106,7 +100,6 @@
     "key": "cmd+2",
     "command": "workbench.view.scm"
   },
-
   {
     "key": "shift+cmd+c",
     "command": "-workbench.action.terminal.openNativeConsole",
@@ -122,7 +115,6 @@
     "command": "workbench.action.terminal.new",
     "when": "terminalProcessSupported || terminalWebExtensionContributedProfile"
   },
-
   {
     "key": "alt+cmd+l",
     "command": "workbench.action.terminal.focusNextPane",
@@ -133,7 +125,6 @@
     "command": "workbench.action.terminal.focusPreviousPane",
     "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
   },
-
   {
     "key": "cmd+k",
     "command": "-workbench.action.terminal.clear",
@@ -149,7 +140,6 @@
     "command": "workbench.action.terminal.kill",
     "when": "terminalFocus"
   },
-
   {
     "key": "alt+cmd+left",
     "command": "workbench.action.terminal.focusPreviousPane",
@@ -170,7 +160,6 @@
     "command": "workbench.action.terminal.focusNext",
     "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
   },
-
   {
     "key": "shift+enter",
     "command": "workbench.action.terminal.sendSequence",
@@ -179,7 +168,6 @@
     },
     "when": "terminalFocus"
   },
-
   {
     "key": "f12",
     "command": "-editor.action.revealDefinition",
@@ -220,7 +208,6 @@
     "command": "editor.gotoNextSymbolFromResult",
     "when": "hasSymbols"
   },
-
   {
     "key": "shift+cmd+,",
     "command": "vscode.open",
