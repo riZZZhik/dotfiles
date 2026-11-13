@@ -1,3 +1,20 @@
+# Presets applied during installation; comment out entries to keep existing settings.
+copy_settings:
+  - home
+  - macos
+  - codex
+  - vscode
+  - iterm
+
+sync:
+  enabled: true
+  apps: [codex, vscode, iterm]
+  state: ~/.local/state/dotfiles
+  label: com.dotfiles.sync
+  agent: ~/Library/LaunchAgents/com.dotfiles.sync.plist
+  interval_seconds: 14400
+  run_at_load: true
+
 setup-terminal:
   title: Terminal
   description: Zsh, CLI tools, Git helpers, networking and monitoring
@@ -124,17 +141,6 @@ setup-iterm:
     - iterm2                      #                                        https://iterm2.com
     - font-fira-code              # Coding font with ligatures           — https://github.com/tonsky/FiraCode
     - font-fira-code-nerd-font    # Coding font with icons               — https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode
-
-copy_settings: true
-
-sync:
-  enabled: true
-  apps: [codex, vscode, iterm]
-  state: ~/.local/state/dotfiles
-  label: com.dotfiles.sync
-  agent: ~/Library/LaunchAgents/com.dotfiles.sync.plist
-  interval_seconds: 14400
-  run_at_load: true
 
 settings:
   codex:

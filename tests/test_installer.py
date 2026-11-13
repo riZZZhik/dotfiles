@@ -74,6 +74,11 @@ class InstallerTests(unittest.TestCase):
     def configure(self):
         path = self.root / "config/setup.yaml"
         document = yaml.safe_load(path.read_text())
+        document["copy_settings"] = [
+            name
+            for name in document["copy_settings"]
+            if name == "home" or "setup-" + name in self.selected
+        ]
         document["sync"]["apps"] = [
             name for name in ("codex", "vscode", "iterm") if "setup-" + name in self.selected
         ]
@@ -194,19 +199,21 @@ class InstallerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 model.load_catalog(self.root)
 
-    def test_yaml_root_switches_require_booleans(self):
+    def test_yaml_copy_selection_and_daemon_switch_are_validated(self):
         path = self.root / "config/setup.yaml"
         original = path.read_text()
-        for key in ("copy_settings", "enabled"):
-            with self.subTest(key=key):
+        for invalid in (True, False, "vscode", ["unknown"], ["vscode", "vscode"], [False]):
+            with self.subTest(invalid=invalid):
                 document = yaml.safe_load(original)
-                if key == "enabled":
-                    document["sync"][key] = "false"
-                else:
-                    document[key] = "false"
+                document["copy_settings"] = invalid
                 path.write_text(yaml.safe_dump(document))
-                with self.assertRaisesRegex(ValueError, "must be true or false"):
+                with self.assertRaisesRegex(ValueError, "copy_settings"):
                     model.load_catalog(self.root)
+        document = yaml.safe_load(original)
+        document["sync"]["enabled"] = "false"
+        path.write_text(yaml.safe_dump(document))
+        with self.assertRaisesRegex(ValueError, "must be true or false"):
+            model.load_catalog(self.root)
 
     def test_scalar_package_action_is_rejected_before_installation(self):
         path = self.root / "config/setup.yaml"

@@ -9,7 +9,7 @@ import unittest
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import tomlkit
 import yaml
@@ -35,7 +35,7 @@ class AdoptSettingsTests(unittest.TestCase):
         self.state = Path(self.sync["state"])
         (self.root / "config/setup.yaml").write_text(
             yaml.safe_dump(
-                {"settings": document["settings"], "sync": document["sync"], "copy_settings": False}
+                {"settings": document["settings"], "sync": document["sync"], "copy_settings": []}
             )
         )
         for target, value in (
@@ -221,3 +221,43 @@ class AdoptSettingsTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "another checkout"):
             apps.install_agent(self.root, ())
         self.assertEqual(agent.read_bytes(), original)
+
+    def test_partial_copy_and_sync_are_independent_without_software_stages(self):
+        document = yaml.safe_load((self.root / "config/setup.yaml").read_text())
+        document["copy_settings"] = ["vscode"]
+        document["sync"]["apps"] = ["iterm"]
+        (self.root / "config/setup.yaml").write_text(yaml.safe_dump(document))
+        vscode, iterm, codex = (Mock(WATCH_PATHS=()) for _ in range(3))
+        with patch.dict(
+            apps.APPLICATIONS,
+            {
+                "vscode": lambda: vscode,
+                "iterm": lambda: iterm,
+                "codex": lambda: codex,
+            },
+        ):
+            cli.main(["install"], self.root)
+        vscode.install.assert_called_once_with()
+        vscode.sync.assert_not_called()
+        iterm.install.assert_called_once_with(copy_settings=False)
+        iterm.sync.assert_called_once_with()
+        codex.install.assert_not_called()
+        codex.sync.assert_not_called()
+        self.shell.assert_not_called()
+
+    def test_home_only_presets_skip_app_links_and_macos_actions(self):
+        source = yaml.safe_load((SOURCE / "config/setup.yaml").read_text())
+        document = yaml.safe_load((self.root / "config/setup.yaml").read_text())
+        document["copy_settings"] = ["home"]
+        document.update(
+            {key: source[key] for key in ("setup-codex", "setup-macos", "setup-terminal")}
+        )
+        (self.root / "config/setup.yaml").write_text(yaml.safe_dump(document))
+        (self.root / "home").mkdir()
+        (self.root / "home/.example").write_text("preset")
+        with patch.object(apps, "sync_apps"), patch("src.cli.macos_preferences") as macos:
+            cli.main(["apply"], self.root)
+        self.assertTrue((self.home / ".example").is_symlink())
+        self.assertFalse((self.home / ".codex/AGENTS.md").exists())
+        macos.assert_not_called()
+        self.shell.assert_called_once_with("packages", "plugins", "install")

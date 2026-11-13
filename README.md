@@ -10,7 +10,8 @@ cd ~/.dotfiles
 ```
 
 Review `config/setup.yaml` before installing. Its `setup-*` stages select software
-and preset actions; `sync.apps` independently selects daemon adapters.
+and preset actions. `copy_settings` selects which presets to apply;
+`sync.apps` independently selects daemon adapters.
 App paths and privacy policies live under `settings.{codex,vscode,iterm}`.
 Python libraries are configured in `pyproject.toml` under `global`; keep `installer`.
 
@@ -23,13 +24,13 @@ To use the supplied presets:
 Configure the two independent root fields in `config/setup.yaml`:
 
 ```yaml
-copy_settings: false
+copy_settings: []
 sync:
   enabled: true
   apps: [codex, vscode, iterm]
 ```
 
-Then run `./install`. With `copy_settings: false`, supplied home links, app presets,
+Then run `./install`. With `copy_settings: []`, supplied home links, app presets,
 macOS defaults and file associations are skipped on install, apply and update.
 Configured software, the installer Python runtime and libraries are still reconciled;
 remove unwanted `setup-*` stages first. You can delete `home/` and the preset directories
@@ -38,7 +39,23 @@ app paths/privacy policies under `settings`.
 
 Exports are created from your apps without importing supplied presets. Codex first
 captures your current configuration, then retains its normal two-way synchronization.
-With `copy_settings: true`, installation performs the one-time preset copy instead.
+Select the presets you want to apply independently:
+
+```yaml
+copy_settings:
+  - home
+  - macos
+  - codex
+  - vscode
+  - iterm
+```
+
+Comment out entries to preserve those settings, or use `copy_settings: []` to skip
+all presets. `home` controls home links and shell plugins; `macos` controls Touch ID
+and macOS defaults; app entries control their presets, links and file associations.
+App presets are copied once during installation, independently of software stages.
+For example, copy only `vscode` while listing both `vscode` and `iterm` in `sync.apps`:
+iTerm exports its own preferences without importing the supplied ones.
 This works independently of `sync.enabled`; set that to `false` (or clear `sync.apps`)
 and run `./install apply` to unload this checkout's daemon. Disabled daemon sync does
 not export preferences. No command-line setting switches or machine-local mode file

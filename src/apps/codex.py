@@ -84,8 +84,7 @@ class Codex(App):
                 document[key] = value
 
     def install(self, *, copy_settings: bool = True) -> None:
-        if not copy_settings:
-            self.install_once(self.adopt_settings, configured=False)
+        self.install_once(self.sync if copy_settings else self.adopt_settings, configured=False)
 
     def adopt_settings(self) -> None:
         destination = path(self.CONFIG["destination"])

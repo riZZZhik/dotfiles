@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ..config import copy_settings_enabled, path
+from ..config import collect_copy_settings, path
 from .base import STATE, SYNC, App
 from .base import write_if_changed as write_if_changed
 from .codex import Codex as Codex
@@ -26,9 +26,9 @@ def sync_apps(
     register_agent: bool = True,
     initialize: tuple[str, ...] = (),
 ):
-    copy = copy_settings_enabled(root)
+    copies = collect_copy_settings(root)
     enabled = SYNC.get("enabled", True)
-    to_copy = initialize if copy else ()
+    to_copy = tuple(name for name in initialize if name in copies)
     active = tuple(dict.fromkeys((*to_copy, *(apps if enabled else ()))))
     if not active:
         if register_agent:
@@ -43,7 +43,7 @@ def sync_apps(
                 adapter = APPLICATIONS[name]()
                 if name in to_copy:
                     adapter.install()
-                elif not copy:
+                elif name not in copies:
                     adapter.install(copy_settings=False)
                 if enabled and name in apps:
                     adapter.sync()

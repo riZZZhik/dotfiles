@@ -10,6 +10,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_NAMES = {"codex", "vscode", "iterm"}
+COPY_NAMES = APP_NAMES | {"home", "macos"}
 
 
 def load(name: str) -> dict[str, Any]:
@@ -69,12 +70,9 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
     root = root.resolve()
     document = yaml.safe_load((root / "config/setup.yaml").read_text())
 
-    for key, value in (
-        ("copy_settings", document.get("copy_settings", True)),
-        ("sync.enabled", document["sync"].get("enabled", True)),
-    ):
-        if type(value) is not bool:
-            raise ValueError(f"{key} must be true or false.")
+    copies = collect_copy_settings(root)
+    if type(document["sync"].get("enabled", True)) is not bool:
+        raise ValueError("sync.enabled must be true or false.")
 
     def claim(config: Configuration, owner: str) -> None:
         source = root / config.source
@@ -95,7 +93,7 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
                 raise ValueError(f"Duplicate configuration destination: {config.destination}")
             destinations.add(config.destination)
 
-    for name in collect_apps(root):
+    for name in dict.fromkeys((*collect_apps(root), *(n for n in copies if n in APP_NAMES))):
         claim(Configuration(document["settings"][name]["shared"]), name)
     for stage_id, settings in document.items():
         if stage_id in {"settings", "sync", "copy_settings"}:
@@ -172,6 +170,15 @@ def collect_apps(root: Path) -> tuple[str, ...]:
     return tuple(selected)
 
 
-def copy_settings_enabled(root: Path) -> bool:
+def collect_copy_settings(root: Path) -> tuple[str, ...]:
     document = yaml.safe_load((root / "config/setup.yaml").read_text())
-    return document.get("copy_settings", True)
+    selected = document.get("copy_settings", [])
+    if not isinstance(selected, list) or any(
+        not isinstance(name, str) or name not in COPY_NAMES for name in selected
+    ):
+        raise ValueError(
+            "copy_settings must list supported settings: home, macos, codex, vscode, iterm."
+        )
+    if len(set(selected)) != len(selected):
+        raise ValueError("copy_settings must not contain duplicate settings.")
+    return tuple(selected)

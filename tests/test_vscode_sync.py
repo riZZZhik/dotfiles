@@ -219,7 +219,7 @@ class VSCodeSyncTests(unittest.TestCase):
 
     def test_yaml_copying_is_independent_of_disabled_daemon(self):
         (self.root / "config").mkdir()
-        (self.root / "config/setup.yaml").write_text("copy_settings: true\n")
+        (self.root / "config/setup.yaml").write_text("copy_settings:\n  - vscode\n")
         (self.shared / "settings.jsonc").write_text('{"editor.fontSize":18}')
         with (
             patch.object(apps, "STATE", self.state),

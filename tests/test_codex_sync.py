@@ -46,6 +46,34 @@ class CodexSyncTests(unittest.TestCase):
             self.assertNotIn("/private", shared.read_text())
             self.assertEqual(target.stat().st_mode & 0o777, 0o600)
 
+    def test_install_copies_missing_presets_once_without_daemon_sync(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shared, target = root / "shared.toml", root / "local.toml"
+            shared.write_text('model="preset"\n')
+            target.write_text('[projects."/private/project"]\ntrust_level="trusted"\n')
+            settings = {
+                "shared": str(shared),
+                "destination": str(target),
+                "backups": str(root / "backups"),
+                "baseline": str(root / "baseline"),
+                "local_only": [["projects"]],
+            }
+            with (
+                patch("src.apps.base.load", return_value=settings),
+                patch("src.apps.base.STATE", root / "state"),
+            ):
+                adapter = Codex()
+                adapter.install()
+                result = tomlkit.parse(target.read_text())
+                self.assertEqual(result["model"], "preset")
+                self.assertIn("/private/project", result["projects"])
+                self.assertNotIn("/private/project", shared.read_text())
+                before = target.read_bytes()
+                shared.write_text('model="changed"\n')
+                adapter.install()
+                self.assertEqual(target.read_bytes(), before)
+
     def test_invalid_or_conflicting_input_leaves_local_file_untouched(self):
         for shared_text, local_text in [
             ("broken = [", 'model="local"'),

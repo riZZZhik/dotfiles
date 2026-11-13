@@ -13,11 +13,12 @@ from pathlib import Path
 
 from . import apps
 from .config import (
+    COPY_NAMES,
     ROOT,
     Stage,
     collect_apps,
+    collect_copy_settings,
     collect_packages,
-    copy_settings_enabled,
     load,
     load_catalog,
     path,
@@ -68,7 +69,7 @@ def link_home(source, destination):
 
 
 def check_sources(root: Path, stages: tuple[Stage, ...]):
-    if not (root / "home").is_dir():
+    if "home" in collect_copy_settings(root) and not (root / "home").is_dir():
         raise RuntimeError("Restore the repository home/ directory before applying dotfiles.")
     for stage in stages:
         for config in stage.configuration:
@@ -81,9 +82,14 @@ def apply(
     stages: tuple[Stage, ...],
     command="apply",
 ):
-    copy = copy_settings_enabled(root)
-    if copy:
-        check_sources(root, stages)
+    copies = collect_copy_settings(root)
+    preset_stages = []
+    for stage in stages:
+        name = stage.id.removeprefix("setup-")
+        if (name if name in COPY_NAMES else "home") in copies:
+            preset_stages.append(stage)
+    check_sources(root, tuple(preset_stages))
+    if "home" in copies:
         link_home(root / "home", Path.home())
     for stage in stages:
         print(f"Stage: {stage.title}")
@@ -93,7 +99,7 @@ def apply(
                 temporary.write("\n".join(p.brew_line() for p in selected) + "\n")
                 temporary.flush()
                 run_shell("packages", command, temporary.name)
-        for config in stage.configuration if copy else ():
+        for config in stage.configuration if stage in preset_stages else ():
             if not config.destination:
                 continue
             source, destination = root / config.source, Path.home() / config.destination
@@ -103,7 +109,15 @@ def apply(
                     shutil.copy2(source, destination)
             else:
                 link(source, destination)
-        for extra in stage.actions if copy else ():
+        for extra in stage.actions:
+            scope = {
+                "shell-plugins": "home",
+                "sudo-touch-id": "macos",
+                "macos-defaults": "macos",
+                "vscode-associations": "vscode",
+            }[extra]
+            if scope not in copies:
+                continue
             if extra == "shell-plugins":
                 run_shell("packages", "plugins", "update" if command == "update" else "install")
             elif extra == "sudo-touch-id" and command == "install":
@@ -115,10 +129,8 @@ def apply(
             elif extra == "vscode-associations" and command == "install":
                 for association in load("vscode")["file_associations"]:
                     subprocess.run(shlex.split(association), check=True)
-    initialize = tuple(
-        stage.id.removeprefix("setup-")
-        for stage in stages
-        if command == "install" and stage.id.removeprefix("setup-") in apps.APPLICATIONS
+    initialize = (
+        tuple(name for name in copies if name in apps.APPLICATIONS) if command == "install" else ()
     )
     apps.sync_apps(root, collect_apps(root), initialize=initialize)
 
