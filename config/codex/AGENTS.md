@@ -66,11 +66,13 @@
 - Before substantial work, check model/effort and environment suitability. Recommend
   a specific setting only when the gain justifies interruption; do not infer active
   settings from defaults. Reassess after material scope changes or repeated reasoning
-  failures. Use the cheapest useful experiment; state expected effort for costly work.
-- When failures call the approach into question or effort materially increases,
+  failures. Use the cheapest experiment that can change the decision; state expected
+  effort for costly work.
+- When attempts stop adding evidence, failures undermine the approach or effort
+  materially increases,
   report elapsed time, the blocker and the cheapest next option. Discuss alternatives
-  or deferral before materially expanding cost, scope or access; routine troubleshooting
-  within the agreed approach proceeds directly.
+  including a concrete manual handoff or deferral before materially expanding cost,
+  scope or access. Routine troubleshooting that adds evidence proceeds directly.
 - Use repository check entrypoints and the cheapest sufficient evidence for agreed
   behavior and important failure guarantees. For bug fixes, establish a reproducer or
   concrete failing path where feasible, then verify the same path afterward.
