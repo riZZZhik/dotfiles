@@ -1,4 +1,3 @@
-import json
 import os
 import plistlib
 import shutil
@@ -40,7 +39,7 @@ class InstallerTests(unittest.TestCase):
             for config in bundle.configuration:
                 source = self.root / config.source
                 source.parent.mkdir(parents=True, exist_ok=True)
-                if config.adapter or config.source.endswith(
+                if config.source.endswith(
                     ("sheldon", "atuin", "/git", "/ruff", "karabiner", "linearmouse")
                 ):
                     source.mkdir(exist_ok=True)
@@ -57,6 +56,10 @@ class InstallerTests(unittest.TestCase):
         home_patch = patch.object(configuration.Path, "home", return_value=self.local_home)
         home_patch.start()
         self.addCleanup(home_patch.stop)
+        for module in ("src.apps", "src.apps.base", "src.apps.vscode", "src.apps.iterm"):
+            state_patch = patch(module + ".STATE", self.local_home / "state")
+            state_patch.start()
+            self.addCleanup(state_patch.stop)
         self.selected = set()
         fork = patch("src.cli.run_shell")
         fork.start()
@@ -71,12 +74,15 @@ class InstallerTests(unittest.TestCase):
     def configure(self):
         path = self.root / "config/setup.yaml"
         document = yaml.safe_load(path.read_text())
+        document["sync"]["apps"] = [
+            name for name in ("codex", "vscode", "iterm") if "setup-" + name in self.selected
+        ]
         path.write_text(
             yaml.safe_dump(
                 {
                     key: value
                     for key, value in document.items()
-                    if key == "settings" or key in self.selected
+                    if key in {"settings", "sync", "copy_settings"} or key in self.selected
                 },
                 sort_keys=False,
             )
@@ -97,8 +103,8 @@ class InstallerTests(unittest.TestCase):
         )
         document = yaml.safe_load((self.root / "config/setup.yaml").read_text())
         for name in ("macos", "vscode", "iterm"):
-            self.assertIn("settings", document["setup-" + name])
-            self.assertNotIn(name, document["settings"])
+            self.assertNotIn("settings", document["setup-" + name])
+            self.assertIn(name, document["settings"])
 
     def test_selection_and_shared_dependency_are_resolved_once(self):
         self.selected.add("setup-desktop")
@@ -111,7 +117,7 @@ class InstallerTests(unittest.TestCase):
     def test_catalog_rejects_overlapping_ownership(self):
         path = self.root / "config/setup.yaml"
         settings = yaml.safe_load(path.read_text())
-        settings["setup-vscode"]["link"] = [{"source": "config/iterm2", "adapter": "iterm"}]
+        settings["setup-vscode"]["link"] = [{"source": "config/iterm2"}]
         path.write_text(yaml.safe_dump(settings))
         with self.assertRaisesRegex(ValueError, "overlapping owners"):
             model.load_catalog(self.root)
@@ -168,21 +174,39 @@ class InstallerTests(unittest.TestCase):
 
     def test_unknown_stage_actions_are_rejected(self):
         path = self.root / "config/setup.yaml"
-        path.write_text("setup-test: {title: Test, description: Test, mystery: true}\n")
+        data = yaml.safe_load(path.read_text())
+        data["setup-test"] = {"title": "Test", "description": "Test", "mystery": True}
+        path.write_text(yaml.safe_dump(data))
         with self.assertRaisesRegex(ValueError, "Unknown actions"):
             model.load_catalog(self.root)
 
-    def test_sync_extras_keep_app_identities_and_reject_old_action_names(self):
-        self.assertEqual(model.collect_apps(self.catalog), ("codex", "vscode", "iterm"))
+    def test_daemon_selection_is_independent_of_preset_stages(self):
         path = self.root / "config/setup.yaml"
         document = yaml.safe_load(path.read_text())
         for name in ("codex", "vscode", "iterm"):
-            with self.subTest(name=name):
-                document["setup-" + name]["extras"] = [name]
+            del document["setup-" + name]
+        path.write_text(yaml.safe_dump(document))
+        model.load_catalog(self.root)
+        self.assertEqual(model.collect_apps(self.root), ("codex", "vscode", "iterm"))
+        for invalid in (["unsupported"], ["vscode", "vscode"], "vscode"):
+            document["sync"]["apps"] = invalid
+            path.write_text(yaml.safe_dump(document))
+            with self.assertRaises(ValueError):
+                model.load_catalog(self.root)
+
+    def test_yaml_root_switches_require_booleans(self):
+        path = self.root / "config/setup.yaml"
+        original = path.read_text()
+        for key in ("copy_settings", "enabled"):
+            with self.subTest(key=key):
+                document = yaml.safe_load(original)
+                if key == "enabled":
+                    document["sync"][key] = "false"
+                else:
+                    document[key] = "false"
                 path.write_text(yaml.safe_dump(document))
-                with self.assertRaisesRegex(ValueError, "Unknown extras"):
+                with self.assertRaisesRegex(ValueError, "must be true or false"):
                     model.load_catalog(self.root)
-                document["setup-" + name]["extras"] = [name + "-sync"]
 
     def test_scalar_package_action_is_rejected_before_installation(self):
         path = self.root / "config/setup.yaml"
@@ -202,7 +226,7 @@ class InstallerTests(unittest.TestCase):
         extra = self.local_home / ".config/new-app.conf"
         extra.write_text("local only")
         self.assertFalse((self.root / "home/.config/new-app.conf").exists())
-        sync.assert_called_once_with(self.root, (), vscode_ui_restored=False)
+        sync.assert_called_once_with(self.root, ("codex", "vscode", "iterm"), initialize=())
 
     def test_missing_home_source_stops_before_linking(self):
         shutil.rmtree(self.root / "home")
@@ -380,11 +404,13 @@ class InstallerTests(unittest.TestCase):
         with (
             patch.object(apps, "STATE", Path(self.temp.name) / "state"),
             patch.dict(apps.APPLICATIONS, {"vscode": lambda: first, "iterm": lambda: second}),
+            patch.object(apps, "install_agent") as register,
             self.assertRaisesRegex(RuntimeError, "vscode: invalid settings"),
         ):
             apps.sync_apps(self.root, ("vscode", "iterm"))
         first.sync.assert_called_once()
         second.sync.assert_called_once()
+        register.assert_called_once_with(self.root, ("vscode", "iterm"))
 
     def shell_command(self, name, content):
         directory = Path(self.temp.name) / "commands"
@@ -539,27 +565,6 @@ class InstallerTests(unittest.TestCase):
                 ["launchctl", "bootstrap", f"gui/{os.getuid()}", str(agent)], check=True
             )
 
-    def test_moved_vscode_adapter_still_reads_repository_data(self):
-        user = Path(self.temp.name) / "code-user"
-        with patch.object(vscode, "PRIVATE", Path(self.temp.name) / "absent-private.jsonc"):
-            vscode.sync_settings(user)
-        expected = vscode.read_jsonc(SOURCE / "config/vscode/settings.jsonc")
-        expected.update(vscode.read_jsonc(SOURCE / "config/vscode/extras.jsonc"))
-        actual = json.loads((user / "settings.json").read_text())
-        self.assertTrue(
-            all(
-                actual.get(k) == v
-                for k, v in expected.items()
-                if k != "settingsSync.ignoredSettings"
-            )
-        )
-        self.assertEqual(
-            (user / "keybindings.json").read_text(),
-            (SOURCE / "config/vscode/keybindings.json")
-            .read_text()
-            .replace("${vscodeDir}", (SOURCE / "config/vscode").as_uri()),
-        )
-
     def test_moved_iterm_adapter_preserves_profile_identity_and_local_keys(self):
         original = {
             "New Bookmarks": [
@@ -612,38 +617,22 @@ class InstallerTests(unittest.TestCase):
             patch.object(apps, "sync_apps") as sync,
         ):
             main(["sync"], self.root)
-            sync.assert_called_once_with(
-                self.root, (), register_agent=False, vscode_ui_restored=False
-            )
+            sync.assert_called_once_with(self.root, (), register_agent=False)
 
-    def test_vscode_ui_acknowledgement_reaches_only_the_vscode_adapter(self):
+    def test_only_install_initializes_apps(self):
         self.selected.add("setup-vscode")
         self.configure()
-        vscode_adapter = Mock()
-        iterm_adapter = Mock()
-        with (
-            patch("src.cli.sys.platform", "darwin"),
-            patch.object(apps, "STATE", self.root / "state"),
-            patch.dict(
-                apps.APPLICATIONS,
-                {"vscode": lambda: vscode_adapter, "iterm": lambda: iterm_adapter},
-            ),
-        ):
-            main(["sync", "--vscode-ui-restored"], self.root)
-            vscode_adapter.sync.assert_called_once_with(ui_restored=True)
-            vscode_adapter.reset_mock()
-            with patch.object(apps, "install_agent"):
-                main(["apply", "--vscode-ui-restored"], self.root)
-            vscode_adapter.sync.assert_called_once_with(ui_restored=True)
-            vscode_adapter.reset_mock()
-            apps.sync_apps(
-                self.root,
-                ("vscode", "iterm"),
-                register_agent=False,
-                vscode_ui_restored=True,
-            )
-            vscode_adapter.sync.assert_called_once_with(ui_restored=True)
-            iterm_adapter.sync.assert_called_once_with()
+        for command in ("install", "apply", "update"):
+            with (
+                self.subTest(command=command),
+                patch.dict(os.environ, {"DOTFILES_AFTER_PULL": "1"}),
+                patch.object(apps, "sync_apps") as sync,
+                patch.object(configuration.subprocess, "run"),
+            ):
+                main([command], self.root)
+                sync.assert_called_once_with(
+                    self.root, ("vscode",), initialize=("vscode",) if command == "install" else ()
+                )
 
     def test_update_only_updates_configured_packages_and_settings(self):
         self.selected.add("setup-vscode")

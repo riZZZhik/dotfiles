@@ -9,7 +9,6 @@ Usage: ./install [install|apply|update|sync|cleanup|link SOURCE|fork|detach]
 
 Install configured stages, link dotfiles and apply settings.
 Install/update reconcile Python and libraries; other commands use the installed runtime.
-After native VS Code UI-state restoration, retry with apply --vscode-ui-restored.
 USAGE
     exit 0
   fi

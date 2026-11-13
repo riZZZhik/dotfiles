@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ..config import path
+from ..config import copy_settings_enabled, path
 from .base import STATE, SYNC, App
 from .base import write_if_changed as write_if_changed
 from .codex import Codex as Codex
@@ -24,27 +24,35 @@ def sync_apps(
     apps: tuple[str, ...],
     *,
     register_agent: bool = True,
-    vscode_ui_restored: bool = False,
+    initialize: tuple[str, ...] = (),
 ):
-    if not apps:
+    copy = copy_settings_enabled(root)
+    enabled = SYNC.get("enabled", True)
+    to_copy = initialize if copy else ()
+    active = tuple(dict.fromkeys((*to_copy, *(apps if enabled else ()))))
+    if not active:
+        if register_agent:
+            install_agent(root, ())
         return
     STATE.mkdir(parents=True, exist_ok=True)
     failures = []
     with (STATE / "sync.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        for name in apps:
+        for name in active:
             try:
                 adapter = APPLICATIONS[name]()
-                if name == "vscode" and vscode_ui_restored:
-                    adapter.sync(ui_restored=True)
-                else:
+                if name in to_copy:
+                    adapter.install()
+                elif not copy:
+                    adapter.install(copy_settings=False)
+                if enabled and name in apps:
                     adapter.sync()
             except Exception as error:  # noqa: BLE001 — isolate failures at the application boundary.
                 failures.append(f"{name}: {error}")
-    if failures:
-        raise RuntimeError("\n".join(failures))
     if register_agent:
         install_agent(root, apps)
+    if failures:
+        raise RuntimeError("\n".join(failures))
 
 
 def install_agent(root: Path, apps: tuple[str, ...]):
@@ -52,6 +60,17 @@ def install_agent(root: Path, apps: tuple[str, ...]):
     agent = path(config["agent"])
     domain = f"gui/{os.getuid()}"
     service = f"{domain}/{config['label']}"
+    if not apps or not config.get("enabled", True):
+        if agent.exists():
+            existing = plistlib.loads(agent.read_bytes())
+            if (
+                existing.get("Label") != config["label"]
+                or Path(existing.get("WorkingDirectory", "")).resolve() != root.resolve()
+            ):
+                raise RuntimeError("Refusing to disable a sync agent owned by another checkout.")
+            subprocess.run(["launchctl", "bootout", service], capture_output=True, check=False)
+            agent.unlink()
+        return
     watch = [
         root / "install",
         root / "src/system.sh",

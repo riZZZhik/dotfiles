@@ -83,6 +83,21 @@ class Codex(App):
                     raise ValueError(f"Cannot replace table containing local fields: {key}")
                 document[key] = value
 
+    def install(self, *, copy_settings: bool = True) -> None:
+        if not copy_settings:
+            self.install_once(self.adopt_settings, configured=False)
+
+    def adopt_settings(self) -> None:
+        destination = path(self.CONFIG["destination"])
+        if not destination.exists():
+            raise FileNotFoundError(
+                "Codex has no settings yet; export will retry after first setup."
+            )
+        values = self.portable(tomlkit.parse(destination.read_text()))
+        content = tomlkit.dumps(values)
+        write_if_changed(self.SHARED, content)
+        write_if_changed(path(self.CONFIG["baseline"]), content)
+
     def sync(self):
         destination = path(self.CONFIG["destination"])
         baseline = path(self.CONFIG["baseline"])

@@ -12,7 +12,16 @@ import tempfile
 from pathlib import Path
 
 from . import apps
-from .config import ROOT, Stage, collect_apps, collect_packages, load, load_catalog, path
+from .config import (
+    ROOT,
+    Stage,
+    collect_apps,
+    collect_packages,
+    copy_settings_enabled,
+    load,
+    load_catalog,
+    path,
+)
 from .detach import detach
 
 
@@ -71,11 +80,11 @@ def apply(
     root: Path,
     stages: tuple[Stage, ...],
     command="apply",
-    *,
-    vscode_ui_restored: bool = False,
 ):
-    check_sources(root, stages)
-    link_home(root / "home", Path.home())
+    copy = copy_settings_enabled(root)
+    if copy:
+        check_sources(root, stages)
+        link_home(root / "home", Path.home())
     for stage in stages:
         print(f"Stage: {stage.title}")
         if command in {"install", "update"} and stage.packages:
@@ -84,7 +93,7 @@ def apply(
                 temporary.write("\n".join(p.brew_line() for p in selected) + "\n")
                 temporary.flush()
                 run_shell("packages", command, temporary.name)
-        for config in stage.configuration:
+        for config in stage.configuration if copy else ():
             if not config.destination:
                 continue
             source, destination = root / config.source, Path.home() / config.destination
@@ -94,7 +103,7 @@ def apply(
                     shutil.copy2(source, destination)
             else:
                 link(source, destination)
-        for extra in stage.actions:
+        for extra in stage.actions if copy else ():
             if extra == "shell-plugins":
                 run_shell("packages", "plugins", "update" if command == "update" else "install")
             elif extra == "sudo-touch-id" and command == "install":
@@ -103,10 +112,15 @@ def apply(
                     run_shell("touch-id", path(touch_id["path"]), path(touch_id["template"]))
             elif extra == "macos-defaults" and command == "install":
                 macos_preferences()
-            elif extra == "vscode-sync" and command == "install":
+            elif extra == "vscode-associations" and command == "install":
                 for association in load("vscode")["file_associations"]:
                     subprocess.run(shlex.split(association), check=True)
-    apps.sync_apps(root, collect_apps(stages), vscode_ui_restored=vscode_ui_restored)
+    initialize = tuple(
+        stage.id.removeprefix("setup-")
+        for stage in stages
+        if command == "install" and stage.id.removeprefix("setup-") in apps.APPLICATIONS
+    )
+    apps.sync_apps(root, collect_apps(root), initialize=initialize)
 
 
 def macos_preferences():
@@ -127,14 +141,7 @@ def main(argv=None, root=ROOT):
         default="install",
     )
     parser.add_argument("source", nargs="?", type=Path, help="Repository home directory to link")
-    parser.add_argument(
-        "--vscode-ui-restored",
-        action="store_true",
-        help="Acknowledge native UI-state import into VS Code's Default profile (apply/sync).",
-    )
     args = parser.parse_args(argv)
-    if args.vscode_ui_restored and args.command not in {"apply", "sync"}:
-        parser.error("--vscode-ui-restored is only valid with apply or sync")
     if sys.platform != "darwin":
         parser.error("This installer supports macOS only.")
     os.environ["PATH"] = (
@@ -179,12 +186,11 @@ def main(argv=None, root=ROOT):
     if command == "sync":
         apps.sync_apps(
             root,
-            collect_apps(stages),
+            collect_apps(root),
             register_agent=False,
-            vscode_ui_restored=args.vscode_ui_restored,
         )
         return
-    apply(root, stages, command=command, vscode_ui_restored=args.vscode_ui_restored)
+    apply(root, stages, command=command)
     print("Dotfiles applied. Review changes, then stage, commit and push them yourself.")
 
 

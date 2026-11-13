@@ -42,37 +42,6 @@ setup-macos:
     - sudo-touch-id               # Enable Touch ID for sudo
     - macos-defaults              # Apply macOS preferences below; install only
 
-  settings:
-    touch_id:
-      enabled: true
-      path: /etc/pam.d/sudo_local
-      template: /etc/pam.d/sudo_local.template
-
-    defaults:
-      - defaults -currentHost write com.apple.controlcenter Bluetooth -int 18
-      - defaults -currentHost write com.apple.controlcenter Sound -int 18
-      - defaults write com.apple.dock scroll-to-open -bool true
-      - defaults write com.apple.dock showAppExposeGestureEnabled -bool true
-      - defaults write com.apple.dock mru-spaces -bool false
-      - defaults write com.apple.dock wvous-bl-corner -int 5
-      - defaults write com.apple.dock wvous-bl-modifier -int 0
-      - defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
-      - defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
-      - defaults write ru.keepcoder.Telegram AutomaticQuoteSubstitutionEnabledTGGrowingTextView -bool false
-      - defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
-      - defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-      - defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
-      - defaults write com.apple.finder AppleShowAllFiles -bool true
-      - defaults write com.apple.finder ShowPathbar -bool true
-      - defaults write com.apple.finder ShowStatusBar -bool true
-      - defaults write com.apple.finder FXDefaultSearchScope -string SCcf
-      - defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
-      - defaults write com.apple.finder _FXSortFoldersFirst -bool true
-
-    restart:
-      - Dock
-      - Finder
-
 setup-development:
   title: Development
   description: Neovim, tmux, direnv and Docker
@@ -97,40 +66,6 @@ setup-codex:
       destination: .codex/AGENTS.md
     - source: config/codex/keybindings.json
       destination: .codex/keybindings.json
-
-  extras:
-    - codex-sync                  # Sync shared preferences; preserve local fields
-
-  settings:
-    shared: config/codex/config.toml
-    destination: ~/.codex/config.toml
-    backups: ~/.local/state/dotfiles/codex/backups
-    baseline: ~/.local/state/dotfiles/codex/baseline.toml
-
-    # Each list is a TOML key path; * matches one key component.
-    local_only:
-      - [projects]
-      - [sandbox_workspace_write, writable_roots]
-      - [shell_environment_policy, set]
-      - [desktop, selected-avatar-id]
-      - [marketplaces]
-      - [notify]
-      - [model_catalog_json]
-      - [model_instructions_file]
-      - [cli_auth_credentials_store]
-      - [mcp_servers, '*', command]
-      - [mcp_servers, '*', args]
-      - [mcp_servers, '*', cwd]
-      - [mcp_servers, '*', env]
-      - [mcp_servers, '*', http_headers]
-      - [mcp_servers, '*', bearer_token]
-      - [model_providers, '*', http_headers]
-      - [model_providers, '*', experimental_bearer_token]
-      - [desktop, worktree-repository-preferences]
-      - [desktop, custom_file_handlers]
-      - [desktop, migratedFollowUpQueueToSteer]
-      - [tui, screen_reader_detection_done]
-      - [tui, model_availability_nux]
 
 setup-desktop:
   title: Desktop apps
@@ -176,17 +111,68 @@ setup-vscode:
     - visual-studio-code          #                                        https://code.visualstudio.com
 
   extras:
-    - vscode-sync                 # Sync settings/extensions; export UI layout
+    - vscode-associations         # Set default file associations during preset installation
 
   brew:
     - duti                        # Default file association manager     — https://github.com/moretension/duti
 
-  settings:
+setup-iterm:
+  title: iTerm
+  description: application, profiles, shortcuts and fonts
+
+  cask:
+    - iterm2                      #                                        https://iterm2.com
+    - font-fira-code              # Coding font with ligatures           — https://github.com/tonsky/FiraCode
+    - font-fira-code-nerd-font    # Coding font with icons               — https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode
+
+copy_settings: true
+
+sync:
+  enabled: true
+  apps: [codex, vscode, iterm]
+  state: ~/.local/state/dotfiles
+  label: com.dotfiles.sync
+  agent: ~/Library/LaunchAgents/com.dotfiles.sync.plist
+  interval_seconds: 14400
+  run_at_load: true
+
+settings:
+  codex:
+    shared: config/codex/config.toml
+    destination: ~/.codex/config.toml
+    backups: ~/.local/state/dotfiles/codex/backups
+    baseline: ~/.local/state/dotfiles/codex/baseline.toml
+
+    # Each list is a TOML key path; * matches one key component.
+    local_only:
+      - [projects]
+      - [sandbox_workspace_write, writable_roots]
+      - [shell_environment_policy, set]
+      - [desktop, selected-avatar-id]
+      - [marketplaces]
+      - [notify]
+      - [model_catalog_json]
+      - [model_instructions_file]
+      - [cli_auth_credentials_store]
+      - [mcp_servers, '*', command]
+      - [mcp_servers, '*', args]
+      - [mcp_servers, '*', cwd]
+      - [mcp_servers, '*', env]
+      - [mcp_servers, '*', http_headers]
+      - [mcp_servers, '*', bearer_token]
+      - [model_providers, '*', http_headers]
+      - [model_providers, '*', experimental_bearer_token]
+      - [desktop, worktree-repository-preferences]
+      - [desktop, custom_file_handlers]
+      - [desktop, migratedFollowUpQueueToSteer]
+      - [tui, screen_reader_detection_done]
+      - [tui, model_availability_nux]
+
+  vscode:
     shared: config/vscode
     private: ~/.dotfiles_secret/vscode/settings.local.jsonc
     user: ~/Library/Application Support/Code/User
     extensions: ~/.vscode/extensions/extensions.json
-    baseline: vscode/extensions.json
     backups: .private/backups/vscode
     cli: /Applications/Visual Studio Code.app/Contents/Resources/app/bin/code
     extension_timeout_seconds: 600
@@ -214,19 +200,7 @@ setup-vscode:
       - duti -s com.microsoft.VSCode public.yaml all
       - duti -s com.microsoft.VSCode net.daringfireball.markdown all
 
-setup-iterm:
-  title: iTerm
-  description: application, profiles, shortcuts and fonts
-
-  cask:
-    - iterm2                      #                                        https://iterm2.com
-    - font-fira-code              # Coding font with ligatures           — https://github.com/tonsky/FiraCode
-    - font-fira-code-nerd-font    # Coding font with icons               — https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode
-
-  extras:
-    - iterm-sync                  # Apply preferences and dynamic profiles
-
-  settings:
+  iterm:
     domain: com.googlecode.iterm2
     process: iTerm2
     shared: config/iterm2
@@ -236,10 +210,33 @@ setup-iterm:
     theme_library: https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/b84cd1e68c9033d967fccd9febbac3072d127b7b/schemes/
     theme_timeout_seconds: 15
 
-settings:
-  sync:
-    state: ~/.local/state/dotfiles
-    label: com.dotfiles.sync
-    agent: ~/Library/LaunchAgents/com.dotfiles.sync.plist
-    interval_seconds: 14400
-    run_at_load: true
+  macos:
+    touch_id:
+      enabled: true
+      path: /etc/pam.d/sudo_local
+      template: /etc/pam.d/sudo_local.template
+
+    defaults:
+      - defaults -currentHost write com.apple.controlcenter Bluetooth -int 18
+      - defaults -currentHost write com.apple.controlcenter Sound -int 18
+      - defaults write com.apple.dock scroll-to-open -bool true
+      - defaults write com.apple.dock showAppExposeGestureEnabled -bool true
+      - defaults write com.apple.dock mru-spaces -bool false
+      - defaults write com.apple.dock wvous-bl-corner -int 5
+      - defaults write com.apple.dock wvous-bl-modifier -int 0
+      - defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
+      - defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+      - defaults write ru.keepcoder.Telegram AutomaticQuoteSubstitutionEnabledTGGrowingTextView -bool false
+      - defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+      - defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+      - defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+      - defaults write com.apple.finder AppleShowAllFiles -bool true
+      - defaults write com.apple.finder ShowPathbar -bool true
+      - defaults write com.apple.finder ShowStatusBar -bool true
+      - defaults write com.apple.finder FXDefaultSearchScope -string SCcf
+      - defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
+      - defaults write com.apple.finder _FXSortFoldersFirst -bool true
+
+    restart:
+      - Dock
+      - Finder
