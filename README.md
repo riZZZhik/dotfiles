@@ -102,7 +102,9 @@ Machine-specific keybindings are saved alongside it as `keybindings.local.json`.
 Each iTerm export captures portable native preferences and all profiles, including
 dynamic profile definitions. It needs no preset template and captures new settings
 and deletions. Public profile references use portable IDs. Commands, host bindings,
-paths, arbitrary text macros, credentials and machine metadata stay in the complete
+paths, arbitrary text macros and credentials stay local. `NoSync`/Cocoa state,
+saved window arrangements, display/Space assignments, version/migration metadata and
+custom AI endpoints are also excluded. The complete native state remains in the
 local snapshot at `~/.local/state/dotfiles/iterm/preferences.plist`. These private
 recovery files have owner-only permissions; they are separate from public Git exports.
 The original preset format remains supported for its initial settings copy.

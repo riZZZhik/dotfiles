@@ -135,6 +135,52 @@ class ITermSyncTests(unittest.TestCase):
         self.assertEqual(before, (self.shared / "settings.json").stat().st_mtime_ns)
         self.assertFalse((self.state / "iterm/installed").exists())
 
+    def test_machine_state_stays_in_local_snapshot_and_survives_preset_import(self):
+        machine = {
+            "NoSyncRecordedVariables": {"hostname": "fixture-machine"},
+            "NoSyncSavedWindowPositions": {"window": "{42, 84}"},
+            "NoSyncBFPRecents": ["private-arrangement"],
+            "NoSyncAllAppVersions": ["fixture-version"],
+            "NoSyncFutureState": {"opaque": 123},
+            "NSWindow Frame Preferences": "{42, 84}",
+            "NSToolbar Configuration com.apple.NSColorPanel": {"TB Is Shown": True},
+            "NSRecentDocuments": ["file:///Volumes/private/document"],
+            "Window Arrangements": {"private-arrangement": {"Screen": 3}},
+            "Default Arrangement Name": "private-arrangement",
+            "iTerm Version": "fixture-version",
+            "HotkeyMigratedFromSingleToMulti": True,
+            "AitermURL": "https://private-provider.invalid/v1",
+            "Background Image Location": "/Volumes/private/background.png",
+            "Local Helper": "/opt/private/helper",
+        }
+        self.native.update(machine)
+        profile = self.native["New Bookmarks"][0]
+        profile.update({"Screen": 3, "Space": 7, "Window Frame": "{42, 84}"})
+        native = deepcopy(self.native)
+        self.adapter.sync()
+        exported = json.loads((self.shared / "settings.json").read_text())["Preferences"]
+        self.assertTrue(set(machine).isdisjoint(exported))
+        public_profile = exported["New Bookmarks"][0]
+        for key in ("Screen", "Space", "Window Frame"):
+            self.assertNotIn(key, public_profile)
+        self.assertEqual(public_profile["Normal Font"], "Fixture 14")
+        self.assertEqual(public_profile["Transparency"], 0.4)
+        self.assertEqual(public_profile["Keyboard Map"]["shortcut"]["Text"], "profile-1")
+        snapshot = self.state / "iterm/preferences.plist"
+        self.assertEqual(plistlib.loads(snapshot.read_bytes()), native)
+        self.assertEqual(snapshot.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(self.native, native)
+        receiver = deepcopy(native)
+        receiver["NoSyncRecordedVariables"] = {"hostname": "another-fixture"}
+        receiver["New Bookmarks"][0].update({"Screen": 1, "Space": 2})
+        restored, _ = self.adapter.build_preferences(receiver)
+        self.assertEqual(restored["NoSyncRecordedVariables"], receiver["NoSyncRecordedVariables"])
+        self.assertEqual(restored["New Bookmarks"][0]["Screen"], 1)
+        self.assertEqual(restored["New Bookmarks"][0]["Space"], 2)
+        before = (self.shared / "settings.json").stat().st_mtime_ns
+        self.adapter.sync()
+        self.assertEqual(before, (self.shared / "settings.json").stat().st_mtime_ns)
+
     def test_export_needs_no_template_and_captures_new_fields_and_all_profiles(self):
         (self.shared / "settings.json").unlink()
         self.native["Personal Global Option"] = True

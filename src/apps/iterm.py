@@ -120,14 +120,22 @@ class ITerm(App):
                 "Dynamic Profile",
                 "PrefsCustomFolder",
                 "LoadPrefsFromCustomFolder",
+                "Screen",
+                "Space",
+                "Window Frame",
+                "Window Position",
+                "Window Size",
+                "Window Arrangements",
+                "Default Arrangement Name",
+                "iTerm Version",
+                "HotkeyMigratedFromSingleToMulti",
+                "AitermURL",
             }
             for name, value in data.items():
                 if (
                     name in private_keys
                     or self.sensitive_key(name)
-                    or name.startswith(
-                        ("NSWindow", "NSNav", "NSSplitView", "SU", "Apple", "NSStatus")
-                    )
+                    or name.startswith(("NoSync", "NS", "SU", "Apple"))
                 ):
                     continue
                 exported = self.portable(value, guids, name)
@@ -143,6 +151,7 @@ class ITerm(App):
                 return guids[data]
             if (
                 self.local_data(data)
+                or data.startswith(("/", "~/", "file://"))
                 or "guid" in key.lower()
                 or re.search(r"[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}", data)
             ):
