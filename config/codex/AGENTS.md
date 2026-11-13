@@ -7,8 +7,9 @@
   and explain disagreements with evidence. Questions and tentative ideas call for
   read-only evaluation, not implementation.
 - Before nontrivial implementation, agree on behavior, scope, approach, observable
-  acceptance, invariants and verification cost. Present the consolidated plan and
-  wait for explicit approval; planning answers and partial approvals only refine it.
+  acceptance, invariants and verification cost. Include the delivery boundary in
+  the proposed plan. Present the consolidated plan and wait for explicit approval;
+  planning answers and partial approvals only refine it.
   Start a named part early only when authorized. Clearly authorized mechanical fixes
   proceed directly. Reuse approval unless behavior, scope or approach materially changes.
 - Treat follow-ups as steering unless the goal is explicitly replaced or cancelled.

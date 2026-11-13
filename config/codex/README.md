@@ -18,6 +18,11 @@ Codex does not participate in the installer lock. Writes are atomic per file, no
 across files; the baseline is written last so an interrupted sync can be rerun.
 Restart Codex after changing startup settings.
 
+In the Codex terminal, `/presets` provides two saved prompts: **1 — Explore and
+plan** investigates the current request without edits; **2 — Approve and finish**
+authorizes the agreed plan through verification, commit, main integration and task
+cleanup, without push or deployment. Select the second only after reviewing the plan.
+
 Portable guidance is linked as `~/.codex/AGENTS.md`. Start a fresh chat after
 installation to check instruction discovery. Runtime state stays local.
 The former `dev-flow` skill is retired; remove its old symlink at
