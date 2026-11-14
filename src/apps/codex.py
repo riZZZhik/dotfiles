@@ -41,7 +41,15 @@ def merge(base, local, shared, prefix=(), initial=False):
 class Codex(App):
     NAME = "codex"
 
-    def excluded(self, keys):
+    def excluded(self, keys, value):
+        if len(keys) == 2 and keys[0] == "mcp_servers":
+            # A server is one transport definition. Stripping a local launcher
+            # while sharing its other fields creates an invalid MCP entry.
+            if not isinstance(value, Mapping) or "command" in value:
+                return True
+            url = value.get("url")
+            if not isinstance(url, str) or not url.strip() or self.excluded((*keys, "url"), url):
+                return True
         return any(
             len(rule) <= len(keys)
             and all(fnmatchcase(key, pattern) for key, pattern in zip(keys, rule))
@@ -52,7 +60,7 @@ class Codex(App):
         result = {}
         for key, value in data.items():
             keys = (*prefix, key)
-            if not self.excluded(keys):
+            if not self.excluded(keys, value):
                 if isinstance(value, Mapping):
                     value = self.portable(value, keys)
                     if not value:
@@ -63,15 +71,22 @@ class Codex(App):
     def update(self, document, values, preserve_local=False, prefix=()):
         for key in list(document):
             keys = (*prefix, key)
-            if preserve_local and self.excluded(keys):
+            if preserve_local and self.excluded(keys, document[key]):
                 continue
             if key not in values:
-                if preserve_local and isinstance(document[key], Mapping):
+                if (
+                    preserve_local
+                    and isinstance(document[key], Mapping)
+                    and prefix != ("mcp_servers",)
+                ):
                     self.update(document[key], {}, True, keys)
                     if document[key]:
                         continue
                 del document[key]
         for key, value in values.items():
+            keys = (*prefix, key)
+            if preserve_local and key in document and self.excluded(keys, document[key]):
+                raise ValueError(f"Cannot replace local configuration: {'.'.join(keys)}")
             if isinstance(value, Mapping) and isinstance(document.get(key), Mapping):
                 self.update(document[key], value, preserve_local, (*prefix, key))
             elif key not in document or document[key] != value:
@@ -114,6 +129,11 @@ class Codex(App):
                     + ". To remove preferences intentionally, edit keys in the existing file."
                 )
         local, shared, base = [tomlkit.parse(text or "") for text in originals]
+        # Older exports retained MCP metadata after removing its transport.
+        # Repair those fragments; self.write backs up the complete original file.
+        for name, server in list(local.get("mcp_servers", {}).items()):
+            if isinstance(server, Mapping) and "command" not in server and "url" not in server:
+                del local["mcp_servers"][name]
         values = merge(
             self.portable(base),
             self.portable(local),

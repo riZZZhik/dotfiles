@@ -22,14 +22,6 @@ memories = true
 generate_memories = true
 use_memories = true
 
-[mcp_servers.node_repl]
-env_vars = [
-  "BROWSER_USE_ACCESS_EXECUTOR_ID",
-  "BROWSER_USE_ACCESS_PIPE_PATH",
-  "BROWSER_USE_ACCESS_VERIFYING_IDENTITY",
-]
-startup_timeout_sec = 120
-
 [mcp_servers.openaiDeveloperDocs]
 startup_readiness = "catalog"
 url = "https://developers.openai.com/mcp"

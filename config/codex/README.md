@@ -6,6 +6,13 @@ in `config/setup.yaml`. Exclusions also apply to nested fields; arrays sync as u
 The exclusion list is not a privacy guarantee: newly introduced machine-specific or
 secret fields must be excluded before sync. Review repository diffs before committing.
 
+STDIO MCP servers stay entirely local. HTTP servers share their URL and portable
+options; authentication headers, tokens and local header helpers stay local.
+Excluding an HTTP URL keeps that entire server local. Deleting a shared HTTP server
+also removes its local authentication fields, with the original file backed up.
+Sync removes transport-less fragments from older exports, backing up the original
+file first. A shared HTTP server cannot replace a local STDIO server of the same name.
+
 On first sync, local values win overlaps and shared-only settings are imported.
 A local baseline then distinguishes changes and deletions on either side. Conflicting
 edits to the same setting stop the sync without changing either file; make the values
