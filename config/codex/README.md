@@ -29,9 +29,14 @@ In the Codex terminal, `/presets` provides two saved prompts: **1 — Explore an
 plan** investigates the current request without edits; **2 — Approve and finish**
 authorizes the agreed plan through verification, commit, main integration and task
 cleanup, without push or deployment. Select the second only after reviewing the plan.
+The planning preset identifies demanding checks and their costs separately. The
+completion preset does not itself approve those checks: the specific checks must
+have explicit approval under `AGENTS.md`, or remain unrun with their gaps reported.
 
-Portable guidance is linked as `~/.codex/AGENTS.md`. Start a fresh chat after
-installation to check instruction discovery. Runtime state stays local.
+`config/codex/AGENTS.md` owns the portable guidance. The Codex setup links it to
+`~/.codex/AGENTS.md`; a separate regular file at that destination can diverge and
+does not receive repository edits. Verify the link after installation, then start
+a fresh chat to check instruction discovery. Runtime state stays local.
 The former `dev-flow` skill is retired; remove its old symlink at
 `~/.agents/skills/dev-flow` if present. No replacement skill is required.
 
@@ -51,7 +56,9 @@ This note is maintenance guidance, not another instruction file to load each tas
 - Evaluate changes against realistic cases: a trivial fix proceeds directly; a
   nontrivial refactor waits for design agreement; a simplification reduces concepts;
   a language change covers visible buttons; failed Mac emulation triggers a cheaper
-  alternative discussion; approved integration preserves another chat's work.
+  alternative discussion; completion approval alone leaves demanding checks unrun;
+  approval for specific checks permits them; approved integration preserves another
+  chat's work.
 - Text review, links and formatting establish instruction consistency only. Claims
   of fewer corrections or faster completion require observed behavior in comparable
   tasks. Keep evaluation evidence in chat unless a durable artifact is requested.

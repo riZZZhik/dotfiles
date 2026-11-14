@@ -109,12 +109,14 @@ label = "Explore and plan"
 input = """
 Investigate the problem or desired outcome described in this chat. If none is stated, ask for it.
 Recommend the simplest sufficient change, define how we will verify it, and identify any decisions you need from me.
+Identify demanding checks separately, with expected cost, side effects and a cheaper alternative; they need explicit approval.
 Stay read-only. Include the proposed delivery boundary.
 """
 
 [tui.presets.2]
 label = "Approve and finish"
 input = """
-Implement the agreed plan. Verify, commit and integrate the selected changes into main, then clean up completed task branches/worktrees.
+Implement the agreed plan and perform agreed verification. Run demanding checks only if I explicitly approved those specific checks; this prompt alone does not authorize them. Report any verification gaps.
+Commit and integrate the selected changes into main, then clean up completed task branches/worktrees.
 Preserve unrelated work and running previews. No push or deployment.
 """
