@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import platform
+import pwd
 import shutil
 import subprocess
 import tarfile
@@ -30,6 +31,18 @@ REPOSITORIES = {
 def privileged(*command: str) -> None:
     prefix = [] if os.geteuid() == 0 else ["sudo"]
     subprocess.run([*prefix, *command], check=True)
+
+
+def set_zsh_default() -> None:
+    shell = Path("/usr/bin/zsh")
+    if not os.access(shell, os.X_OK):
+        raise RuntimeError("Install zsh before setting it as the default shell.")
+    account = pwd.getpwuid(os.getuid())
+    # /bin/zsh and /usr/bin/zsh can refer to the same Ubuntu executable.
+    if Path(account.pw_shell).resolve() == shell.resolve():
+        return
+    privileged("chsh", "-s", str(shell), account.pw_name)
+    print("Default shell set to zsh. Open a new terminal to use it.")
 
 
 def asset_name(tool: str, version: str, architecture: str) -> str:

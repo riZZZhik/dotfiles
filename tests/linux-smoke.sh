@@ -8,6 +8,8 @@ done
 [[ ! -e "$HOME/.config/karabiner" && ! -e "$HOME/.config/linearmouse" ]]
 [[ ! -e "$HOME/Library" && ! -e "$HOME/.codex/keybindings.json" ]]
 [[ -L "$HOME/.zshrc" && -f "$HOME/.codex/config.toml" ]]
+login_shell=$(getent passwd "$(id -un)" | cut -d: -f7)
+[[ "$(readlink -f "$login_shell")" == "$(readlink -f /usr/bin/zsh)" ]]
 if [[ "${DOTFILES_TEST_VERIFY_CODEX:-true}" == true ]]; then
   command -v codex >/dev/null
   codex features list >/dev/null

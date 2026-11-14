@@ -70,8 +70,8 @@ configuration does not uninstall them.
 
 ## Setup on Ubuntu / WSL2
 
-Installs CLI tools and shared shell/Codex settings. Tested on Ubuntu 24.04;
-desktop apps and macOS settings are skipped.
+Installs CLI tools and shared shell/Codex settings, and sets zsh as the default
+login shell. Tested on Ubuntu 24.04; desktop apps and macOS settings are skipped.
 
 Keep the checkout in the Linux filesystem, under `~/`:
 

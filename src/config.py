@@ -130,6 +130,7 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
         extras = settings.get("extras", ())
         if set(extras) - {
             "shell-plugins",
+            "zsh-default",
             "sudo-touch-id",
             "macos-defaults",
             "vscode-associations",

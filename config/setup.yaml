@@ -53,6 +53,7 @@ setup-terminal:
 
   extras:
     - shell-plugins               # Install Zsh plugins managed by Sheldon
+    - zsh-default                 # Set Zsh as the Ubuntu login shell
 
 setup-macos:
   platforms: [darwin]

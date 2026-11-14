@@ -41,6 +41,7 @@ class LinuxTests(unittest.TestCase):
             patch.object(Path, "home", return_value=self.home),
             patch.object(apps, "sync_apps"),
             patch.object(cli, "run_shell"),
+            patch.object(linux, "set_zsh_default") as default_shell,
         ):
             cli.apply(ROOT, config.load_catalog(ROOT))
             backups = list(self.home.glob("dotfiles-backup-*/.zshrc"))
@@ -50,9 +51,19 @@ class LinuxTests(unittest.TestCase):
             self.assertFalse((self.home / ".config/linearmouse").exists())
             cli.apply(ROOT, config.load_catalog(ROOT))
             self.assertEqual(backups, list(self.home.glob("dotfiles-backup-*/.zshrc")))
+        self.assertTrue(default_shell.called)
         with patch.object(apps.subprocess, "run") as run:
             apps.install_agent(ROOT, ("codex",))
         run.assert_not_called()
+
+    def test_disabling_home_presets_preserves_the_login_shell(self):
+        with (
+            patch.object(cli, "collect_copy_settings", return_value=()),
+            patch.object(apps, "sync_apps"),
+            patch.object(linux, "set_zsh_default") as default_shell,
+        ):
+            cli.apply(ROOT, config.load_catalog(ROOT))
+        default_shell.assert_not_called()
 
     def test_explicit_private_file_destination_and_home_escape(self):
         source = self.base / "private/key"

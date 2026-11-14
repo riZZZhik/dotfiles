@@ -125,6 +125,7 @@ def apply(
         for extra in stage.actions:
             scope = {
                 "shell-plugins": "home",
+                "zsh-default": "home",
                 "sudo-touch-id": "macos",
                 "macos-defaults": "macos",
                 "vscode-associations": "vscode",
@@ -133,6 +134,10 @@ def apply(
                 continue
             if extra == "shell-plugins":
                 run_shell("packages", "plugins", "update" if command == "update" else "install")
+            elif extra == "zsh-default" and sys.platform == "linux":
+                from .linux import set_zsh_default
+
+                set_zsh_default()
             elif extra == "sudo-touch-id" and command == "install":
                 touch_id = load("macos")["touch_id"]
                 if touch_id["enabled"]:
