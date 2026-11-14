@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_NAMES = {"codex", "vscode", "iterm"}
+LINUX_COPIES = {"home", "codex"}
 COPY_NAMES = APP_NAMES | {"home", "macos"}
 
 
@@ -39,8 +41,16 @@ class Configuration:
     source: str
     destination: str = ""
     mode: str = "link"
+    platforms: tuple[str, ...] = ("darwin", "linux")
 
     def __post_init__(self):
+        if (
+            not isinstance(self.platforms, (list, tuple))
+            or not self.platforms
+            or set(self.platforms) - {"darwin", "linux"}
+        ):
+            raise ValueError(f"Invalid configuration platforms: {self.platforms}")
+        object.__setattr__(self, "platforms", tuple(self.platforms))
         for name in ("source", "destination"):
             value = getattr(self, name)
             if name == "destination" and not value:
@@ -101,6 +111,9 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
         unknown = set(settings) - {
             "title",
             "description",
+            "platforms",
+            "apt",
+            "release",
             "brew",
             "cask",
             "mas",
@@ -109,6 +122,11 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
         }
         if unknown:
             raise ValueError(f"Unknown actions in {stage_id}: {', '.join(sorted(unknown))}")
+        platforms = settings.get("platforms", ["darwin", "linux"])
+        if not isinstance(platforms, list) or set(platforms) - {"darwin", "linux"}:
+            raise ValueError(f"Invalid platforms in {stage_id}.")
+        if sys.platform not in platforms:
+            continue
         extras = settings.get("extras", ())
         if set(extras) - {
             "shell-plugins",
@@ -117,7 +135,7 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
             "vscode-associations",
         }:
             raise ValueError(f"Unknown extras in {stage_id}.")
-        for kind in ("brew", "cask", "mas"):
+        for kind in ("brew", "cask", "mas", "apt", "release"):
             if kind in settings:
                 values = settings[kind]
                 if kind == "mas":
@@ -130,11 +148,15 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
                     raise ValueError(
                         f"{stage_id}.{kind} must be a package list or App Store name/ID mapping."
                     )
-        configs = tuple(Configuration(**c) for c in settings.get("link", ()))
+        configs = tuple(
+            config
+            for c in settings.get("link", ())
+            if sys.platform in (config := Configuration(**c)).platforms
+        )
         packages = tuple(
             Package(kind, name, values[name] if kind == "mas" else 0)
             for kind, values in settings.items()
-            if kind in {"brew", "cask", "mas"}
+            if kind in ({"apt", "release"} if sys.platform == "linux" else {"brew", "cask", "mas"})
             for name in values
         )
         stage = Stage(
@@ -167,7 +189,7 @@ def collect_apps(root: Path) -> tuple[str, ...]:
         raise ValueError("sync.apps must list supported apps: codex, vscode, iterm.")
     if len(set(selected)) != len(selected):
         raise ValueError("sync.apps must not contain duplicate apps.")
-    return tuple(selected)
+    return tuple(name for name in selected if sys.platform != "linux" or name == "codex")
 
 
 def collect_copy_settings(root: Path) -> tuple[str, ...]:
@@ -181,4 +203,4 @@ def collect_copy_settings(root: Path) -> tuple[str, ...]:
         )
     if len(set(selected)) != len(selected):
         raise ValueError("copy_settings must not contain duplicate settings.")
-    return tuple(selected)
+    return tuple(name for name in selected if sys.platform != "linux" or name in LINUX_COPIES)

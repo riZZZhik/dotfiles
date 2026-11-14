@@ -1,8 +1,8 @@
 # riZZZhik's dotfiles
 
-Personal macOS setup, with optional presets and app exports.
+Personal macOS and Ubuntu CLI setup, with shared public/private settings and optional macOS app exports.
 
-## Setup
+## Setup on macOS
 
 ```sh
 git clone https://github.com/riZZZhik/dotfiles.git ~/.dotfiles
@@ -68,6 +68,24 @@ existing exports remain intact. Select only the apps you use in `sync.apps`.
 If Command Line Tools setup opens, finish it and rerun. Removing packages from
 configuration does not uninstall them.
 
+## Setup on Ubuntu / WSL2
+
+Installs CLI tools and shared shell/Codex settings. Tested on Ubuntu 24.04;
+desktop apps and macOS settings are skipped.
+
+Keep the checkout in the Linux filesystem, under `~/`:
+
+```sh
+git clone https://github.com/riZZZhik/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+./install
+exec zsh -l
+```
+
+Configure Linux packages through `apt` and `release` in `config/setup.yaml`.
+For private settings, clone into `~/.dotfiles_secret` and run its `./install`.
+Codex sync is manual (`./install sync`); no background sync is registered.
+
 ## Commands
 
 | Command | Effect |
@@ -77,7 +95,7 @@ configuration does not uninstall them.
 | `./install sync` | Export VS Code/iTerm preferences; sync Codex settings. |
 | `./install cleanup` | Clear package caches. |
 | `./install fork` | Create a GitHub fork and switch `origin`; no push. |
-| `./install link SOURCE` | Explicitly link SOURCE's contents into `~/`. |
+| `./install link SOURCE [DESTINATION]` | Link a directory into `~/`, or a file/directory to an explicit home-relative destination. |
 | `./install detach` | Stop sync and replace both repositories' home links with local copies. |
 
 ## App settings

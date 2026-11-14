@@ -1,0 +1,21 @@
+FROM ubuntu:24.04 AS runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends sudo ca-certificates \
+    && useradd --create-home --shell /bin/bash dotfiles \
+    && echo 'dotfiles ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/dotfiles
+USER dotfiles
+ENV HOME=/home/dotfiles PATH=/home/dotfiles/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+WORKDIR /home/dotfiles/.dotfiles
+COPY --chown=dotfiles:dotfiles .python-version pyproject.toml ./
+COPY --chown=dotfiles:dotfiles src/linux.sh src/linux.sh
+RUN bash src/linux.sh --python
+
+FROM runtime AS test
+ARG VERIFY_CODEX=true
+ENV DOTFILES_TEST_VERIFY_CODEX=${VERIFY_CODEX} PYTHONUNBUFFERED=1
+COPY --chown=dotfiles:dotfiles . .
+RUN if [ "$VERIFY_CODEX" = false ]; then \
+      python3 -c 'from pathlib import Path; import yaml; p=Path("config/setup.yaml"); d=yaml.safe_load(p.read_text()); d["setup-codex"]["release"]=[]; p.write_text(yaml.safe_dump(d, sort_keys=False))'; \
+    fi && ./install
+RUN GIT_CONFIG_GLOBAL=/dev/null python3 -m unittest discover -s tests -q
+CMD ["bash", "tests/linux-smoke.sh"]

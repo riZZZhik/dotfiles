@@ -21,6 +21,9 @@ SOURCE = Path(__file__).resolve().parents[1]
 
 class AdoptSettingsTests(unittest.TestCase):
     def setUp(self):
+        platform_patch = patch("sys.platform", "darwin")
+        platform_patch.start()
+        self.addCleanup(platform_patch.stop)
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name) / "repo"

@@ -56,6 +56,8 @@ def sync_apps(
 
 
 def install_agent(root: Path, apps: tuple[str, ...]):
+    if sys.platform != "darwin":
+        return
     config = SYNC
     agent = path(config["agent"])
     domain = f"gui/{os.getuid()}"

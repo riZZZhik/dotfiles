@@ -25,9 +25,11 @@ if command -v nvim >/dev/null 2>&1; then
 fi
 typeset -U path PATH
 
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-export LANGUAGE=en_US.UTF-8
+if locale -a 2>/dev/null | command grep -qi '^en_US[.]utf-8$'; then
+  export LANG=en_US.UTF-8
+elif [[ "$OSTYPE" == linux* ]]; then
+  export LANG=C.UTF-8
+fi
 
 if [ "$(uname)" = "Darwin" ]; then
   _extend_path "/opt/homebrew/sbin"
@@ -46,9 +48,7 @@ setopt SHARE_HISTORY
 
 export ZSH="$HOME/.local/share/sheldon/repos/github.com/ohmyzsh/ohmyzsh"
 plugins=(
-  macos          # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/macos
   git            # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git
-  brew           # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/brew
   docker         # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/docker
   docker-compose # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/docker-compose
   sudo           # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/sudo
@@ -57,6 +57,10 @@ plugins=(
 
   ssh-agent
 )
+
+if [[ "$OSTYPE" == darwin* ]]; then
+  plugins+=(macos brew)
+fi
 
 # The ssh-agent plugin reads these settings while loading.
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -80,6 +84,10 @@ bindkey -M viins '^Xe' edit-command-line
 bindkey -M emacs '^Xq' push-line
 bindkey -M viins '^Xq' push-line
 
+if [[ "$OSTYPE" == linux* ]] && _exists clip.exe; then
+  pbcopy() { clip.exe; }
+fi
+
 if _exists fzf; then
   _source ~/.config/fzf.zsh
   source <(fzf --zsh)
@@ -99,7 +107,7 @@ if _exists zoxide; then
   compdef _cd _cd_zoxide
 fi
 
-if [[ -f ~/.iterm2_shell_integration.zsh ]]; then
+if [[ "$OSTYPE" == darwin* && -f ~/.iterm2_shell_integration.zsh ]]; then
   source ~/.iterm2_shell_integration.zsh
 fi
 

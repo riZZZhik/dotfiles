@@ -5,7 +5,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 for argument in "$@"; do
   if [[ "$argument" == --help || "$argument" == -h ]]; then
     cat <<'USAGE'
-Usage: ./install [install|apply|update|sync|cleanup|link SOURCE|fork|detach]
+Usage: ./install [install|apply|update|sync|cleanup|link SOURCE [DESTINATION]|fork|detach]
 
 Install configured stages, link dotfiles and apply settings.
 Install/update reconcile Python and libraries; other commands use the installed runtime.
@@ -14,19 +14,24 @@ USAGE
   fi
 done
 
-if [[ "$(uname -s)" != Darwin ]]; then
-  echo 'This installer supports macOS only.' >&2
-  exit 1
-fi
+platform=$(uname -s)
+case "$platform" in
+  Darwin|Linux) ;;
+  *) echo 'This installer supports macOS and Ubuntu Linux only.' >&2; exit 1 ;;
+esac
 
 case "${1:-install}" in
   install|update)
-    if ! xcode-select -p >/dev/null 2>&1; then
-      xcode-select --install
-      printf 'Finish installing Command Line Tools, then rerun this command.\n' >&2
-      exit 1
+    if [[ "$platform" == Darwin ]]; then
+      if ! xcode-select -p >/dev/null 2>&1; then
+        xcode-select --install
+        printf 'Finish installing Command Line Tools, then rerun this command.\n' >&2
+        exit 1
+      fi
+      bash src/system.sh --python
+    else
+      bash src/linux.sh --python
     fi
-    bash src/system.sh --python
     ;;
 esac
 

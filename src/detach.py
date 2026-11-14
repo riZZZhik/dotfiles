@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import os
 import plistlib
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -42,6 +44,12 @@ def links(root: Path, private: Path, home: Path) -> list[Path]:
     # without traversing unrelated directories such as Library or Documents.
     for repository in roots:
         source = repository / "home"
+        platform_home = (
+            repository / "home-platform" / ("macos" if sys.platform == "darwin" else "linux")
+        )
+        if platform_home.is_dir():
+            for entry in platform_home.iterdir():
+                visit(entry, home / entry.name, entry.is_dir())
         names = {entry.name for entry in source.iterdir()} if source.is_dir() else set()
         names.update(entry.name for entry in home.iterdir() if entry.is_symlink())
         for name in names:
@@ -78,7 +86,13 @@ def tree(source: Path, roots: tuple[Path, ...], relative=Path(), ancestors=froze
 
 def stamp(source: Path):
     value = source.lstat()
-    return value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns, value.st_ctime_ns
+    digest = None
+    if stat.S_ISREG(value.st_mode):
+        # Linux can give same-size rewrites the same timestamp tick. Metadata
+        # alone would let detachment replace a link with an obsolete copy.
+        with source.open("rb") as content:
+            digest = hashlib.file_digest(content, "sha256").digest()
+    return value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns, value.st_ctime_ns, digest
 
 
 def replace_link(link: Path, roots: tuple[Path, ...]) -> None:
@@ -136,7 +150,7 @@ def detach(root: Path, private: Path | None = None) -> None:
         except (OSError, ValueError, RuntimeError) as error:
             errors.append(f"{link}: {error}")
     agent = path(SYNC["agent"])
-    original = agent.read_bytes() if agent.exists() else None
+    original = agent.read_bytes() if sys.platform == "darwin" and agent.exists() else None
     if original is not None:
         document = plistlib.loads(original)
         if (
@@ -151,13 +165,19 @@ def detach(root: Path, private: Path | None = None) -> None:
     with (STATE / "sync.lock").open("a") as lock:
         # Let an in-flight sync finish before unloading it; reuse the sync owner's lock.
         fcntl.flock(lock, fcntl.LOCK_EX)
-        if (agent.read_bytes() if agent.exists() else None) != original:
+        if (
+            sys.platform == "darwin"
+            and (agent.read_bytes() if agent.exists() else None) != original
+        ):
             raise RuntimeError("LaunchAgent changed during preflight; retry.")
         service = f"gui/{os.getuid()}/{SYNC['label']}"
-        loaded = subprocess.run(["launchctl", "print", service], capture_output=True, check=False)
-        if loaded.returncode == 0:
-            subprocess.run(["launchctl", "bootout", service], check=True)
-        agent.unlink(missing_ok=True)
+        if sys.platform == "darwin":
+            loaded = subprocess.run(
+                ["launchctl", "print", service], capture_output=True, check=False
+            )
+            if loaded.returncode == 0:
+                subprocess.run(["launchctl", "bootout", service], check=True)
+            agent.unlink(missing_ok=True)
         for link in candidates:
             replace_link(link, roots)
     print(f"Removed dotfiles sync automation; replaced {len(candidates)} links with local copies.")

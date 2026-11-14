@@ -16,6 +16,9 @@ from src import detach as operation
 
 class DetachTests(unittest.TestCase):
     def setUp(self):
+        platform_patch = patch("sys.platform", "darwin")
+        platform_patch.start()
+        self.addCleanup(platform_patch.stop)
         temporary = tempfile.TemporaryDirectory(dir="/tmp")
         self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name)
@@ -168,6 +171,7 @@ class DetachTests(unittest.TestCase):
 
         def changing(entry, destination):
             result = copy(entry, destination)
+            # Same-size rewrites can retain the same timestamp tick on Linux.
             entry.write_text("changed during copy")
             return result
 

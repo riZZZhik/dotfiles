@@ -48,10 +48,14 @@ setup-terminal:
     - yt-dlp                      # Video and audio downloader           — https://github.com/yt-dlp/yt-dlp
     - terminal-notifier           # Desktop notifications from scripts   — https://github.com/julienXX/terminal-notifier
 
+  apt: [zsh, git, git-lfs, gh, ripgrep, fd-find, bat, eza, duf, htop, curl, wget, unzip, lsof, trash-cli, openssh-client, iproute2]
+  release: [atuin, fzf, sheldon, starship, zoxide, delta, lazygit, dust]
+
   extras:
     - shell-plugins               # Install Zsh plugins managed by Sheldon
 
 setup-macos:
+  platforms: [darwin]
   title: macOS settings
   description: Touch ID for sudo and Finder, Dock and keyboard preferences
 
@@ -68,10 +72,13 @@ setup-development:
     - neovim                      #                                        https://neovim.io
     - tmux                        #                                        https://github.com/tmux/tmux/wiki
 
+  apt: [direnv, neovim, tmux]
+
   cask:
     - docker-desktop              #                                        https://docker.com
 
 setup-codex:
+  release: [codex]
   title: Codex
   description: Codex CLI, instructions and configuration
 
@@ -82,9 +89,11 @@ setup-codex:
     - source: config/codex/AGENTS.md
       destination: .codex/AGENTS.md
     - source: config/codex/keybindings.json
+      platforms: [darwin]
       destination: .codex/keybindings.json
 
 setup-desktop:
+  platforms: [darwin]
   title: Desktop apps
   description: communication, productivity, entertainment and App Store apps
 
@@ -121,6 +130,7 @@ setup-desktop:
     GoodNotes: 1444383602         # Handwritten notes and PDFs
 
 setup-vscode:
+  platforms: [darwin]
   title: VS Code
   description: application, settings, shortcuts and extensions
 
@@ -134,6 +144,7 @@ setup-vscode:
     - duti                        # Default file association manager     — https://github.com/moretension/duti
 
 setup-iterm:
+  platforms: [darwin]
   title: iTerm
   description: application, profiles, shortcuts and fonts
 

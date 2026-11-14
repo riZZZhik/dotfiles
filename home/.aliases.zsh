@@ -16,17 +16,36 @@ if _exists bat; then
   alias cat='bat -p'
 fi
 
+# WSL opens files in the Windows host without installing a Linux desktop.
+if [[ "$OSTYPE" == linux* ]] && _exists explorer.exe && _exists wslpath; then
+  open_command() {
+    local target
+    for target in "${@:-.}"; do
+      if [[ "$target" == *://* ]]; then
+        explorer.exe "$target"
+      else
+        explorer.exe "$(wslpath -w "$target")"
+      fi
+    done
+  }
+fi
+
 if _exists open_command; then
   alias open='open_command'
 fi
 
-alias caff='caffeinate -i'
+if [[ "$OSTYPE" == darwin* ]]; then
+  alias caff='caffeinate -i'
+  alias term='open -a iterm.app'
+fi
 alias c='clear'
 alias q="cd ~ && clear"
 alias e="$EDITOR"
 alias -g G="| rg"
 alias -g L='2>&1 | tee'
-alias -g C='| pbcopy'
+if _exists pbcopy; then
+  alias -g C='| pbcopy'
+fi
 alias -- +x='chmod +x'
 alias x+='chmod +x'
 alias reload="source $HOME/.zshrc"
@@ -34,7 +53,6 @@ alias path='echo -e ${PATH//:/\\n}'
 
 alias o='open'
 alias oo='open .'
-alias term='open -a iterm.app'
 
 [ -d ~/Downloads ] && alias dl='cd ~/Downloads'
 [ -d ~/Desktop ] && alias dt='cd ~/Desktop'
@@ -45,7 +63,11 @@ function mkcd {
 
 alias sizes='du -sh * | sort -h'
 alias get="curl -O -L"
-alias myip='ifconfig | sed -En "s/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p"'
+if [[ "$OSTYPE" == linux* ]]; then
+  myip() { ip -o -4 addr show scope global | awk '{print $4}' | cut -d/ -f1; }
+else
+  alias myip='ifconfig | sed -En "s/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p"'
+fi
 alias ports='lsof -i -P -n | grep LISTEN'
 function killport() { lsof -tiTCP:"${1:?Usage: killport <port>}" -sTCP:LISTEN | xargs kill -9 ; }
 

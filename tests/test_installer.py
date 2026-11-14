@@ -24,6 +24,9 @@ preferences = apps
 
 class InstallerTests(unittest.TestCase):
     def setUp(self):
+        platform_patch = patch("sys.platform", "darwin")
+        platform_patch.start()
+        self.addCleanup(platform_patch.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name) / "repo with spaces"
@@ -609,7 +612,7 @@ class InstallerTests(unittest.TestCase):
 
     def test_unsupported_platform_stops_before_any_operation(self):
         with (
-            patch("src.cli.sys.platform", "linux"),
+            patch("src.cli.sys.platform", "win32"),
             patch("src.cli.run_shell") as cleanup,
             self.assertRaises(SystemExit),
         ):

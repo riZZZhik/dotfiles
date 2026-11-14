@@ -51,7 +51,9 @@ def preserve(destination):
         print(f"Preserved {destination} at {backup}")
 
 
-def link_home(source, destination):
+def link_home(source, destination, *, excluded=frozenset(), relative=Path()):
+    if relative.as_posix() in excluded:
+        return
     if not source.is_dir() or source.is_symlink():
         link(source, destination)
         return
@@ -65,7 +67,9 @@ def link_home(source, destination):
         preserve(destination)
     destination.mkdir(parents=True, exist_ok=True)
     for entry in source.iterdir():
-        link_home(entry, destination / entry.name)
+        link_home(
+            entry, destination / entry.name, excluded=excluded, relative=relative / entry.name
+        )
 
 
 def check_sources(root: Path, stages: tuple[Stage, ...]):
@@ -90,10 +94,19 @@ def apply(
             preset_stages.append(stage)
     check_sources(root, tuple(preset_stages))
     if "home" in copies:
-        link_home(root / "home", Path.home())
+        excluded = (
+            frozenset({".config/karabiner", ".config/linearmouse"})
+            if sys.platform == "linux"
+            else frozenset()
+        )
+        link_home(root / "home", Path.home(), excluded=excluded)
     for stage in stages:
         print(f"Stage: {stage.title}")
-        if command in {"install", "update"} and stage.packages:
+        if command in {"install", "update"} and stage.packages and sys.platform == "linux":
+            from .linux import install_packages
+
+            install_packages(stage.packages, update=command == "update")
+        if command in {"install", "update"} and stage.packages and sys.platform == "darwin":
             selected = collect_packages((stage,))
             with tempfile.NamedTemporaryFile(mode="w", suffix=".Brewfile") as temporary:
                 temporary.write("\n".join(p.brew_line() for p in selected) + "\n")
@@ -152,23 +165,37 @@ def main(argv=None, root=ROOT):
         nargs="?",
         default="install",
     )
-    parser.add_argument("source", nargs="?", type=Path, help="Repository home directory to link")
+    parser.add_argument("source", nargs="?", type=Path, help="Repository settings to link")
+    parser.add_argument("destination", nargs="?", help="Home-relative destination for link")
     args = parser.parse_args(argv)
-    if sys.platform != "darwin":
-        parser.error("This installer supports macOS only.")
+    if sys.platform not in {"darwin", "linux"}:
+        parser.error("This installer supports macOS and Ubuntu Linux only.")
     os.environ["PATH"] = (
         f"{Path.home() / '.local/bin'}:/opt/homebrew/bin:/usr/local/bin:"
         + os.environ.get("PATH", "")
     )
     command = args.command
     if command == "link":
-        if args.source is None or not args.source.is_dir():
-            parser.error("link requires an existing repository home directory")
+        if args.source is None or not args.source.exists():
+            parser.error("link requires an existing source")
+        if not args.source.is_dir() and args.destination is None:
+            parser.error("link requires a destination for a file source")
         source = args.source.resolve()
         home = Path.home()
         if home.resolve().is_relative_to(source):
             parser.error("the source must not contain your home directory")
-        link_home(source, home)
+        destination = home
+        if args.destination is not None:
+            from .config import Configuration
+
+            try:
+                destination = home / Configuration("home", args.destination).destination
+            except ValueError as error:
+                parser.error(str(error))
+            # Reject a destination parent symlink escaping the user home.
+            if not destination.parent.resolve().is_relative_to(home.resolve()):
+                parser.error("link destination must remain inside your home")
+        link_home(source, destination)
         for entry in home.iterdir():
             if (
                 entry.is_symlink()
@@ -178,13 +205,16 @@ def main(argv=None, root=ROOT):
                 entry.unlink()
         print("Dotfiles linked.")
         return
-    if args.source is not None:
-        parser.error("a source directory is only valid with link")
+    if args.source is not None or args.destination is not None:
+        parser.error("source and destination are only valid with link")
     if command == "detach":
         detach(root)
         return
     if command == "cleanup":
-        run_shell("packages", "cleanup")
+        if sys.platform == "linux":
+            subprocess.run(["bash", str(ROOT / "src/linux.sh"), "--cleanup"], check=True)
+        else:
+            run_shell("packages", "cleanup")
         print("Package caches cleaned.")
         return
     if command == "update" and not os.environ.get("DOTFILES_AFTER_PULL"):
