@@ -1,6 +1,6 @@
 {
   // #region Theme
-  "workbench.colorTheme": "Tokyo Night",
+  "workbench.colorTheme": "One Dark Pro Flat",
   "workbench.iconTheme": "material-icon-theme",
   // #endregion
 
@@ -192,6 +192,7 @@
   // #region Markdown and diagnostics
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "diffEditor.ignoreTrimWhitespace": false,
   },
   "markdownlint.config": {
     "MD024": false,
