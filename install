@@ -8,7 +8,7 @@ for argument in "$@"; do
 Usage: ./install [install|apply|update|sync|cleanup|link SOURCE [DESTINATION]|fork|detach]
 
 Install configured stages, link dotfiles and apply settings.
-Install/update reconcile Python and libraries; other commands use the installed runtime.
+Install reconciles Python and libraries. Update upgrades packages and Sheldon plugins.
 USAGE
     exit 0
   fi
@@ -20,8 +20,12 @@ case "$platform" in
   *) echo 'This installer supports macOS and Ubuntu Linux only.' >&2; exit 1 ;;
 esac
 
+if [[ "${1:-install}" == update ]]; then
+  exec bash src/system.sh --update
+fi
+
 case "${1:-install}" in
-  install|update)
+  install)
     if [[ "$platform" == Darwin ]]; then
       if ! xcode-select -p >/dev/null 2>&1; then
         xcode-select --install

@@ -91,7 +91,7 @@ Codex sync is manual (`./install sync`); no background sync is registered.
 | Command | Effect |
 | --- | --- |
 | `./install apply` | Relink presets when enabled; export app preferences and register sync. |
-| `./install update` | Pull changes and update configured software. |
+| `./install update` | Update installed packages and Sheldon plugins. |
 | `./install sync` | Export VS Code/iTerm preferences; sync Codex settings. |
 | `./install cleanup` | Clear package caches. |
 | `./install fork` | Create a GitHub fork and switch `origin`; no push. |

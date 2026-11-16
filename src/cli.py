@@ -102,11 +102,11 @@ def apply(
         link_home(root / "home", Path.home(), excluded=excluded)
     for stage in stages:
         print(f"Stage: {stage.title}")
-        if command in {"install", "update"} and stage.packages and sys.platform == "linux":
+        if command == "install" and stage.packages and sys.platform == "linux":
             from .linux import install_packages
 
-            install_packages(stage.packages, update=command == "update")
-        if command in {"install", "update"} and stage.packages and sys.platform == "darwin":
+            install_packages(stage.packages)
+        if command == "install" and stage.packages and sys.platform == "darwin":
             selected = collect_packages((stage,))
             with tempfile.NamedTemporaryFile(mode="w", suffix=".Brewfile") as temporary:
                 temporary.write("\n".join(p.brew_line() for p in selected) + "\n")
@@ -133,7 +133,7 @@ def apply(
             if scope not in copies:
                 continue
             if extra == "shell-plugins":
-                run_shell("packages", "plugins", "update" if command == "update" else "install")
+                run_shell("packages", "plugins")
             elif extra == "zsh-default" and sys.platform == "linux":
                 from .linux import set_zsh_default
 
@@ -222,8 +222,8 @@ def main(argv=None, root=ROOT):
             run_shell("packages", "cleanup")
         print("Package caches cleaned.")
         return
-    if command == "update" and not os.environ.get("DOTFILES_AFTER_PULL"):
-        os.execv("/bin/bash", ["bash", str(ROOT / "src/system.sh"), "--update", str(root)])
+    if command == "update":
+        run_shell("update")
         return
 
     if command == "fork":

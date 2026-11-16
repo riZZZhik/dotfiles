@@ -24,15 +24,6 @@ grep -q SHELL_OK /tmp/dotfiles-shell.log
 ./install sync
 ./install cleanup
 ./install
-# Exercise the update/re-exec path against a disposable local remote.
-git init -q -b main
-git config user.name Fixture
-git config user.email fixture@example.invalid
-git add .
-git -c commit.gpgsign=false commit -qm fixture
-git init -q --bare /tmp/dotfiles-remote.git
-git remote add origin /tmp/dotfiles-remote.git
-git push -q -u origin main
 ./install update
 ./install detach
 [[ ! -L "$HOME/.zshrc" && -f "$HOME/.zshrc" ]]

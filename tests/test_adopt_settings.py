@@ -263,4 +263,4 @@ class AdoptSettingsTests(unittest.TestCase):
         self.assertTrue((self.home / ".example").is_symlink())
         self.assertFalse((self.home / ".codex/AGENTS.md").exists())
         macos.assert_not_called()
-        self.shell.assert_called_once_with("packages", "plugins", "install")
+        self.shell.assert_called_once_with("packages", "plugins")

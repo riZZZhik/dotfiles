@@ -67,6 +67,7 @@ class InstallerTests(unittest.TestCase):
         fork = patch("src.cli.run_shell")
         fork.start()
         self.addCleanup(fork.stop)
+        self.shell_command("uname", "echo Darwin\n")
 
     def git(self, *args):
         return subprocess.check_output(["git", "-C", str(self.root), *args], text=True)
@@ -332,6 +333,21 @@ class InstallerTests(unittest.TestCase):
                 self.assertIn("Run ./install first", result.stderr)
                 self.assertNotIn("unexpected-setup", result.stderr)
 
+        for name in ("brew", "sheldon"):
+            self.shell_command(name, 'echo "$0 $*"\n')
+        result = subprocess.run(
+            ["bash", str(self.root / "install"), "update"],
+            check=False,
+            env=env,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [line.split("/")[-1] for line in result.stdout.splitlines()],
+            ["brew upgrade", "sheldon lock --update"],
+        )
+
         self.configure()
         python = self.local_home / ".local/bin/python3"
         python.parent.mkdir(parents=True)
@@ -449,21 +465,31 @@ class InstallerTests(unittest.TestCase):
             check=False,
         )
 
-    def test_package_install_and_update_use_only_the_selected_manifest(self):
+    def test_package_install_uses_manifest_and_update_upgrades_everything(self):
         self.shell_command(
             "brew",
-            '[[ "$MAS_NO_AUTO_INDEX" == 1 ]]\necho "$*" >> "$COMMAND_LOG"\n',
+            'echo "brew $*" >> "$COMMAND_LOG"\n'
+            '[[ "$COMMAND_FAIL" != 1 ]]\n',
         )
+        self.shell_command("sheldon", 'echo "sheldon $*" >> "$COMMAND_LOG"\n')
         for action, expected in (
-            ("install", ["bundle install --no-upgrade --file=selected.Brewfile"]),
-            ("update", ["update", "bundle install --upgrade --file=selected.Brewfile"]),
+            ("install", ["brew bundle install --file=selected.Brewfile"]),
+            ("update", ["brew upgrade", "sheldon lock --update"]),
         ):
             with self.subTest(action=action):
-                result = self.run_shell("packages.sh", action, "selected.Brewfile")
+                arguments = ("selected.Brewfile",) if action == "install" else ()
+                result = (
+                    self.run_shell("update.sh")
+                    if action == "update"
+                    else self.run_shell("packages.sh", action, *arguments)
+                )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 log = Path(self.temp.name) / "commands.log"
                 self.assertEqual(log.read_text().splitlines(), expected)
                 log.unlink()
+        result = self.run_shell("update.sh", fail=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(log.read_text().splitlines(), ["brew upgrade"])
 
     def test_touch_id_preserves_enabled_entry_and_rejects_invalid_template(self):
         self.shell_command(
@@ -641,10 +667,9 @@ class InstallerTests(unittest.TestCase):
     def test_only_install_initializes_apps(self):
         self.selected.add("setup-vscode")
         self.configure()
-        for command in ("install", "apply", "update"):
+        for command in ("install", "apply"):
             with (
                 self.subTest(command=command),
-                patch.dict(os.environ, {"DOTFILES_AFTER_PULL": "1"}),
                 patch.object(apps, "sync_apps") as sync,
                 patch.object(configuration.subprocess, "run"),
             ):
@@ -653,43 +678,19 @@ class InstallerTests(unittest.TestCase):
                     self.root, ("vscode",), initialize=("vscode",) if command == "install" else ()
                 )
 
-    def test_update_only_updates_configured_packages_and_settings(self):
-        self.selected.add("setup-vscode")
-        self.configure()
-        manifests = []
-        with (
-            patch("src.cli.sys.platform", "darwin"),
-            patch.dict("os.environ", {"DOTFILES_AFTER_PULL": "1"}),
-            patch("builtins.input") as ask,
-            patch(
-                "src.cli.run_shell",
-                side_effect=lambda *args: manifests.append(Path(args[2]).read_text()),
-            ) as install,
-            patch.object(apps, "sync_apps"),
-        ):
-            main(["update"], self.root)
-        install.assert_called_once()
-        self.assertEqual(install.call_args.args[0:2], ("packages", "update"))
-        self.assertEqual(len(install.call_args.args), 3)
-        self.assertEqual(manifests, ['cask "visual-studio-code"\nbrew "duti"\n'])
-
-        ask.assert_not_called()
-
-    def test_update_refresh_preserves_safe_pull_and_reexecutes_updated_installer(self):
-        self.shell_command("git", 'echo "$*" >> "$COMMAND_LOG"\n[[ "$COMMAND_FAIL" != 1 ]]\n')
-        entrypoint = self.root / "install"
-        entrypoint.write_text('#!/bin/bash\necho "$DOTFILES_AFTER_PULL $*" >> "$COMMAND_LOG"\n')
-        result = self.run_shell("update.sh", self.root)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        log = Path(self.temp.name) / "commands.log"
-        self.assertEqual(
-            log.read_text().splitlines(),
-            ["-c merge.autoStash=false pull --ff-only --no-rebase", "1 update"],
-        )
-        log.unlink()
-        result = self.run_shell("update.sh", self.root, fail=True)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(len(log.read_text().splitlines()), 1)
+    def test_update_only_upgrades_packages_and_plugins_without_loading_settings(self):
+        for platform in ("darwin", "linux"):
+            with (
+                self.subTest(platform=platform),
+                patch("src.cli.sys.platform", platform),
+                patch("src.cli.load_catalog") as catalog,
+                patch("src.cli.run_shell") as update,
+                patch.object(apps, "sync_apps") as sync,
+            ):
+                main(["update"], self.root)
+            update.assert_called_once_with("update")
+            catalog.assert_not_called()
+            sync.assert_not_called()
 
 
 if __name__ == "__main__":

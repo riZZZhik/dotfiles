@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+export PATH="$PATH:$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin"
 
 homebrew() (
   if ! command -v brew >/dev/null; then
@@ -41,11 +41,7 @@ packages() (
   shift
   case "$action" in
     plugins)
-      if [[ "$1" == update ]]; then
-        sheldon lock --update
-      else
-        sheldon lock
-      fi
+      sheldon lock
       exit 0
       ;;
     cleanup)
@@ -53,16 +49,10 @@ packages() (
       exit 0
       ;;
   esac
-  manifest=$1
   homebrew
-  export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1
   export MAS_NO_AUTO_INDEX=1
-  upgrade=--no-upgrade
-  if [[ "$action" == update ]]; then
-    brew update
-    upgrade=--upgrade
-  fi
-  brew bundle install "$upgrade" "--file=$manifest"
+  manifest=$1
+  brew bundle install "--file=$manifest"
 )
 
 touch_id() (
@@ -84,10 +74,12 @@ touch_id() (
 )
 
 update() (
-  cd "$1"
-  git -c merge.autoStash=false pull --ff-only --no-rebase
-  export DOTFILES_AFTER_PULL=1
-  exec bash "$PWD/install" update
+  if [[ $(uname -s) == Linux ]]; then
+    bash "$(dirname "${BASH_SOURCE[0]}")/linux.sh" --update
+  else
+    brew upgrade
+  fi
+  sheldon lock --update
 )
 
 case "${1:-}" in
@@ -111,8 +103,7 @@ case "${1:-}" in
     exit
     ;;
   --update)
-    shift
-    update "$@"
+    update
     exit
     ;;
 esac

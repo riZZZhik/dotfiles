@@ -118,7 +118,7 @@ class LinuxTests(unittest.TestCase):
             patch.object(linux, "download", side_effect=download),
             self.assertRaisesRegex(RuntimeError, "Checksum mismatch"),
         ):
-            linux.install_release("fzf", update=False)
+            linux.install_release("fzf")
         self.assertEqual(destination.read_text(), "original executable\n")
 
 

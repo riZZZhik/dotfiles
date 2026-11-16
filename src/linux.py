@@ -81,10 +81,10 @@ def download(url: str, target: Path) -> None:
     )
 
 
-def install_release(tool: str, *, update: bool) -> None:
+def install_release(tool: str) -> None:
     destination = Path.home() / ".local/bin" / tool
     state = Path.home() / ".local/state/dotfiles/packages" / (tool + ".json")
-    if destination.is_file() and state.exists() and not update:
+    if destination.is_file() and state.exists():
         return
     if tool == "codex":
         # The supported installer includes sandbox/code-mode helpers and owns
@@ -162,7 +162,7 @@ def install_release(tool: str, *, update: bool) -> None:
         print(f"Installed {tool} {release['tag_name']}")
 
 
-def install_packages(packages: tuple[Package, ...], *, update: bool) -> None:
+def install_packages(packages: tuple[Package, ...]) -> None:
     ubuntu = platform.freedesktop_os_release()
     if ubuntu.get("ID") != "ubuntu":
         raise RuntimeError("Linux installation currently supports Ubuntu only.")
@@ -178,4 +178,4 @@ def install_packages(packages: tuple[Package, ...], *, update: bool) -> None:
             destination.symlink_to(source)
     for package in packages:
         if package.kind == "release":
-            install_release(package.name, update=update)
+            install_release(package.name)

@@ -11,6 +11,10 @@ privileged() {
   if [[ $(id -u) == 0 ]]; then "$@"; else sudo "$@"; fi
 }
 case "${1:-}" in
+  --update)
+    privileged apt-get update
+    privileged apt-get upgrade -y
+    ;;
   --python)
     privileged apt-get update
     privileged apt-get install -y --no-install-recommends ca-certificates curl git
