@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import fcntl
 import os
 import plistlib
 import subprocess
@@ -11,7 +10,6 @@ from pathlib import Path
 
 from ..config import collect_copy_settings, path
 from .base import STATE, SYNC, App
-from .base import write_if_changed as write_if_changed
 from .codex import Codex as Codex
 from .iterm import ITerm as ITerm
 from .vscode import VSCode as VSCode
@@ -35,24 +33,18 @@ def sync_apps(
             install_agent(root, ())
         return
     STATE.mkdir(parents=True, exist_ok=True)
-    failures = []
-    with (STATE / "sync.lock").open("w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
+    try:
         for name in active:
-            try:
-                adapter = APPLICATIONS[name]()
-                if name in to_copy:
-                    adapter.install()
-                elif name not in copies:
-                    adapter.install(copy_settings=False)
-                if enabled and name in apps:
-                    adapter.sync()
-            except Exception as error:  # noqa: BLE001 — isolate failures at the application boundary.
-                failures.append(f"{name}: {error}")
-    if register_agent:
-        install_agent(root, apps)
-    if failures:
-        raise RuntimeError("\n".join(failures))
+            adapter = APPLICATIONS[name]()
+            if name in to_copy:
+                adapter.install()
+            elif name not in copies:
+                adapter.install(copy_settings=False)
+            if enabled and name in apps:
+                adapter.sync()
+    finally:
+        if register_agent:
+            install_agent(root, apps)
 
 
 def install_agent(root: Path, apps: tuple[str, ...]):

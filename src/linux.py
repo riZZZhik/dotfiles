@@ -13,7 +13,7 @@ import tarfile
 import tempfile
 from pathlib import Path
 
-from .config import Package
+from .config import ROOT, Package
 
 # Upstream release assets avoid Ubuntu's older shell-integration interfaces.
 REPOSITORIES = {
@@ -119,12 +119,6 @@ def install_release(tool: str) -> None:
         asset = next((item for item in release["assets"] if item["name"] == name), None)
         if asset is None:
             raise RuntimeError(f"No {name} in {repository} release {release['tag_name']}")
-        if (
-            destination.is_file()
-            and state.exists()
-            and json.loads(state.read_text()).get("version") == release["tag_name"]
-        ):
-            return
         print(f"Downloading {tool} {release['tag_name']}", flush=True)
         archive = temporary / "release.tar.gz"
         download(asset["browser_download_url"], archive)
@@ -146,7 +140,9 @@ def install_release(tool: str) -> None:
         subprocess.run([str(binary), "--version"], check=True, stdout=subprocess.DEVNULL)
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.exists() or destination.is_symlink():
-            backup = Path(tempfile.mkdtemp(prefix="dotfiles-backup-", dir=Path.home())) / tool
+            directory = ROOT / ".private/backups/packages"
+            directory.mkdir(parents=True, exist_ok=True)
+            backup = Path(tempfile.mkdtemp(prefix="backup-", dir=directory)) / tool
             shutil.copy2(destination, backup, follow_symlinks=False)
             print(f"Preserved {destination} at {backup}")
         # Copy within the destination filesystem before atomic replacement.
@@ -168,7 +164,7 @@ def install_packages(packages: tuple[Package, ...]) -> None:
         raise RuntimeError("Linux installation currently supports Ubuntu only.")
     apt = [package.name for package in packages if package.kind == "apt"]
     if apt:
-        privileged("apt-get", "install", "-y", "--no-install-recommends", *apt)
+        privileged("apt-get", "install", "-y", *apt)
     # Debian/Ubuntu rename these commands. Keep aliases local, never alter /usr/bin.
     binary_directory = Path.home() / ".local/bin"
     binary_directory.mkdir(parents=True, exist_ok=True)

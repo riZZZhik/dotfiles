@@ -2,12 +2,13 @@
 set -euo pipefail
 cd "$HOME/.dotfiles"
 export TERM=xterm-256color
-for tool in zsh sheldon starship atuin fzf zoxide git git-lfs gh delta lazygit uv python3 nvim tmux direnv rg fd bat eza duf dust htop curl wget unzip lsof trash ssh ip; do
+for tool in zsh sheldon starship atuin fzf zoxide git git-lfs gh delta lazygit uv nvim tmux direnv rg fd bat eza duf dust htop curl wget unzip lsof trash ssh ip; do
   command -v "$tool" >/dev/null || { echo "Missing CLI: $tool" >&2; exit 1; }
 done
 [[ ! -e "$HOME/.config/karabiner" && ! -e "$HOME/.config/linearmouse" ]]
 [[ ! -e "$HOME/Library" && ! -e "$HOME/.codex/keybindings.json" ]]
 [[ -L "$HOME/.zshrc" && -f "$HOME/.codex/config.toml" ]]
+.venv/bin/python -c 'import yaml, json5, tomlkit'
 login_shell=$(getent passwd "$(id -un)" | cut -d: -f7)
 [[ "$(readlink -f "$login_shell")" == "$(readlink -f /usr/bin/zsh)" ]]
 if [[ "${DOTFILES_TEST_VERIFY_CODEX:-true}" == true ]]; then
@@ -22,7 +23,6 @@ fi
 grep -q SHELL_OK /tmp/dotfiles-shell.log
 ./install apply
 ./install sync
-./install cleanup
 ./install
 ./install update
 ./install detach

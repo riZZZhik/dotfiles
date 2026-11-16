@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import re
 import shutil
-import sqlite3
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -13,7 +12,7 @@ from typing import Any
 import json5
 
 from ..config import path
-from .base import STATE, App, write_if_changed, write_json_if_changed
+from .base import STATE, App, write_if_changed
 from .jsonc import Document
 
 
@@ -25,14 +24,10 @@ class VSCode(App):
         self.PRIVATE = path(self.CONFIG["private"])
         self.USER = path(self.CONFIG["user"])
         self.EXTENSIONS = path(self.CONFIG["extensions"])
-        self.WATCH_PATHS = (self.USER, self.USER / "globalStorage/state.vscdb", self.EXTENSIONS)
-        self.LAYOUT_KEYS = frozenset(self.CONFIG["layout_keys"])
+        self.WATCH_PATHS = (self.USER, self.EXTENSIONS)
 
     def install(self, *, copy_settings: bool = True) -> None:
-        self.install_once(
-            self.copy_settings,
-            configured=not copy_settings or (STATE / "vscode/extensions.json").exists(),
-        )
+        self.install_once(self.copy_settings, configured=not copy_settings)
 
     def private_file(self) -> Path:
         if self.PRIVATE.parent.is_dir():
@@ -53,10 +48,6 @@ class VSCode(App):
             .read_text()
             .replace("${vscodeDir}", self.SHARED.as_uri())
         )
-        # Keep the optional native layout import available after automatic exports begin.
-        profile = self.SHARED / "ui-state.code-profile"
-        if profile.exists():
-            self.write(self.BACKUPS / "initial-ui-state.code-profile", profile.read_text())
         self.write(
             self.USER / "settings.json", json.dumps(settings, indent=2, ensure_ascii=False) + "\n"
         )
@@ -105,13 +96,9 @@ class VSCode(App):
         all_bindings = bindings_document.value
         if not isinstance(all_bindings, list):
             raise TypeError("VS Code keybindings must be an array.")
-        keybindings = [item for item in all_bindings if not self.local_data(item)]
-        local_bindings = [item for item in all_bindings if self.local_data(item)]
-        values = {}
-        database = self.USER / "globalStorage/state.vscdb"
-        if database.exists():
-            with sqlite3.connect(database.as_uri() + "?mode=ro", uri=True) as connection:
-                values = dict(connection.execute("SELECT key, value FROM ItemTable"))
+        keybindings, local_bindings = [], []
+        for item in all_bindings:
+            (local_bindings if self.local_data(item) else keybindings).append(item)
         private_file = self.private_file()
         private = self.read_jsonc(private_file) if private_file.exists() else {}
         local_keys = {
@@ -222,30 +209,6 @@ class VSCode(App):
                 extensions_file,
                 "# Exported from local VS Code.\n" + "\n".join(sorted(installed)) + "\n",
             )
-        if values:
-            self.export_ui_state(values, self.SHARED / "ui-state.code-profile")
-
-    def export_ui_state(self, values: dict, destination: Path) -> None:
-        targets = json.loads(values.get("__$__targetStorageMarker", "{}"))
-        storage = {
-            key: value
-            for key, value in sorted(values.items())
-            if targets.get(key) == 0
-            and (
-                key in self.LAYOUT_KEYS
-                or key.startswith(("workbench.", "~remote."))
-                and key.endswith(".hidden")
-            )
-        }
-        profile = {"name": "Dotfiles UI", "globalState": json.dumps({"storage": storage})}
-        if destination.exists():
-            try:
-                existing = json.loads(destination.read_text())
-                if json.loads(existing.get("globalState", "{}")) == {"storage": storage}:
-                    profile["globalState"] = existing["globalState"]
-            except (ValueError, TypeError, AttributeError):
-                pass
-        write_json_if_changed(destination, profile)
 
     def read_jsonc(self, file: Path) -> dict[str, Any]:
         try:

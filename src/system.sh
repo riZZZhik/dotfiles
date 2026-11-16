@@ -16,10 +16,7 @@ python_setup() (
     homebrew
     brew install uv
   fi
-  version=$(cat .python-version)
-  uv python install "$version" --default
-  uv python pin --global "$version"
-  uv pip install --python "$HOME/.local/bin/python3" --break-system-packages --group installer --group global
+  bash src/python.sh
 )
 
 fork() (
@@ -44,13 +41,8 @@ packages() (
       sheldon lock
       exit 0
       ;;
-    cleanup)
-      brew cleanup
-      exit 0
-      ;;
   esac
   homebrew
-  export MAS_NO_AUTO_INDEX=1
   manifest=$1
   brew bundle install "--file=$manifest"
 )
@@ -73,6 +65,14 @@ touch_id() (
   sudo install -o root -g wheel -m 0444 "$file" "$config"
 )
 
+cleanup() (
+  if [[ $(uname -s) == Linux ]]; then
+    bash "$(dirname "${BASH_SOURCE[0]}")/linux.sh" --cleanup
+  else
+    brew cleanup
+  fi
+)
+
 update() (
   if [[ $(uname -s) == Linux ]]; then
     bash "$(dirname "${BASH_SOURCE[0]}")/linux.sh" --update
@@ -80,6 +80,7 @@ update() (
     brew upgrade
   fi
   sheldon lock --update
+  cleanup
 )
 
 case "${1:-}" in
@@ -100,6 +101,10 @@ case "${1:-}" in
   --touch-id)
     shift
     touch_id "$@"
+    exit
+    ;;
+  --cleanup)
+    cleanup
     exit
     ;;
   --update)

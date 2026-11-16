@@ -92,55 +92,6 @@ class CodexSyncTests(unittest.TestCase):
                 if existing:
                     self.assertEqual(installed["local_tools"], stdio)
 
-    def test_sync_repairs_old_transportless_fragments_with_backup_and_is_idempotent(self):
-        for previous_sync in (False, True):
-            with (
-                self.subTest(previous_sync=previous_sync),
-                tempfile.TemporaryDirectory() as directory,
-            ):
-                root = Path(directory)
-                broken = {"env_vars": ["LOCAL_PIPE"], "startup_timeout_sec": 120}
-                stdio = {"command": "local-helper", "env": {"TOKEN": "synthetic-private"}}
-                shared = {
-                    "model": "fixture",
-                    "mcp_servers": {
-                        "broken_tools": broken,
-                        "docs": {"url": "https://example.invalid/mcp"},
-                    },
-                }
-                local = {
-                    "model": "fixture",
-                    "mcp_servers": {"broken_tools": broken, "tools": stdio},
-                }
-                if previous_sync:
-                    local["mcp_servers"]["docs"] = shared["mcp_servers"]["docs"]
-                adapter = self.mcp_adapter(root, shared, local, shared if previous_sync else None)
-                original = (root / "local.toml").read_bytes()
-                adapter.sync()
-                installed = tomlkit.parse((root / "local.toml").read_text())
-                self.assertNotIn("broken_tools", installed["mcp_servers"])
-                self.assertEqual(installed["mcp_servers"]["tools"], stdio)
-                self.assertEqual(
-                    installed["mcp_servers"]["docs"]["url"], "https://example.invalid/mcp"
-                )
-                self.assertTrue(
-                    any(p.read_bytes() == original for p in (root / "backups").iterdir())
-                )
-                before = {
-                    p: (p.read_bytes(), p.stat().st_mtime_ns)
-                    for p in root.rglob("*")
-                    if p.is_file()
-                }
-                adapter.sync()
-                self.assertEqual(
-                    before,
-                    {
-                        p: (p.read_bytes(), p.stat().st_mtime_ns)
-                        for p in root.rglob("*")
-                        if p.is_file()
-                    },
-                )
-
     def test_http_server_with_local_url_stays_local_as_a_complete_definition(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

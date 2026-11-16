@@ -40,7 +40,6 @@ class Package:
 class Configuration:
     source: str
     destination: str = ""
-    mode: str = "link"
     platforms: tuple[str, ...] = ("darwin", "linux")
 
     def __post_init__(self):
@@ -59,8 +58,6 @@ class Configuration:
             if not relative.parts or relative.is_absolute() or ".." in relative.parts:
                 raise ValueError(f"Stage paths must remain relative and nonempty: {value}")
             object.__setattr__(self, name, relative.as_posix())
-        if self.mode not in {"link", "seed"}:
-            raise ValueError(f"Unknown configuration mode: {self.mode}")
 
 
 @dataclass(frozen=True)
@@ -80,7 +77,7 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
     root = root.resolve()
     document = yaml.safe_load((root / "config/setup.yaml").read_text())
 
-    copies = collect_copy_settings(root)
+    copies = _copy_settings(document)
     if type(document["sync"].get("enabled", True)) is not bool:
         raise ValueError("sync.enabled must be true or false.")
 
@@ -103,7 +100,7 @@ def load_catalog(root: Path) -> tuple[Stage, ...]:
                 raise ValueError(f"Duplicate configuration destination: {config.destination}")
             destinations.add(config.destination)
 
-    for name in dict.fromkeys((*collect_apps(root), *(n for n in copies if n in APP_NAMES))):
+    for name in dict.fromkeys((*_apps(document), *(n for n in copies if n in APP_NAMES))):
         claim(Configuration(document["settings"][name]["shared"]), name)
     for stage_id, settings in document.items():
         if stage_id in {"settings", "sync", "copy_settings"}:
@@ -183,6 +180,10 @@ def collect_packages(stages: tuple[Stage, ...]) -> tuple[Package, ...]:
 
 def collect_apps(root: Path) -> tuple[str, ...]:
     document = yaml.safe_load((root / "config/setup.yaml").read_text())
+    return _apps(document)
+
+
+def _apps(document: dict[str, Any]) -> tuple[str, ...]:
     selected = document["sync"]["apps"]
     if not isinstance(selected, list) or any(
         not isinstance(name, str) or name not in APP_NAMES for name in selected
@@ -195,6 +196,10 @@ def collect_apps(root: Path) -> tuple[str, ...]:
 
 def collect_copy_settings(root: Path) -> tuple[str, ...]:
     document = yaml.safe_load((root / "config/setup.yaml").read_text())
+    return _copy_settings(document)
+
+
+def _copy_settings(document: dict[str, Any]) -> tuple[str, ...]:
     selected = document.get("copy_settings", [])
     if not isinstance(selected, list) or any(
         not isinstance(name, str) or name not in COPY_NAMES for name in selected

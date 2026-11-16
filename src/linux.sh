@@ -17,7 +17,7 @@ case "${1:-}" in
     ;;
   --python)
     privileged apt-get update
-    privileged apt-get install -y --no-install-recommends ca-certificates curl git
+    privileged apt-get install -y ca-certificates curl git
     export PATH="$HOME/.local/bin:$PATH"
     if ! command -v uv >/dev/null; then
       script=$(mktemp)
@@ -25,9 +25,7 @@ case "${1:-}" in
       curl --fail --location --retry 3 https://astral.sh/uv/install.sh -o "$script"
       UV_NO_MODIFY_PATH=1 sh "$script"
     fi
-    version=$(cat .python-version)
-    uv python install "$version" --default
-    uv pip install --python "$HOME/.local/bin/python3" --break-system-packages --group installer --group global
+    bash src/python.sh
     ;;
   --cleanup)
     privileged apt-get clean

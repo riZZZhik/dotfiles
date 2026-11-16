@@ -129,11 +129,6 @@ class Codex(App):
                     + ". To remove preferences intentionally, edit keys in the existing file."
                 )
         local, shared, base = [tomlkit.parse(text or "") for text in originals]
-        # Older exports retained MCP metadata after removing its transport.
-        # Repair those fragments; self.write backs up the complete original file.
-        for name, server in list(local.get("mcp_servers", {}).items()):
-            if isinstance(server, Mapping) and "command" not in server and "url" not in server:
-                del local["mcp_servers"][name]
         values = merge(
             self.portable(base),
             self.portable(local),

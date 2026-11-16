@@ -127,9 +127,7 @@ class ITermSyncTests(unittest.TestCase):
         text = (self.shared / "settings.json").read_text()
         for excluded in ("local-guid", "private-host", "/Users/fixture"):
             self.assertNotIn(excluded, text)
-        full = plistlib.loads((self.state / "iterm/preferences.plist").read_bytes())
-        self.assertEqual(full["New Bookmarks"][0]["Command"], "ssh private-host")
-        self.assertEqual((self.state / "iterm/preferences.plist").stat().st_mode & 0o777, 0o600)
+        self.assertFalse((self.state / "iterm/preferences.plist").exists())
         before = (self.shared / "settings.json").stat().st_mtime_ns
         self.adapter.sync()
         self.assertEqual(before, (self.shared / "settings.json").stat().st_mtime_ns)
@@ -147,7 +145,7 @@ class ITermSyncTests(unittest.TestCase):
         self.adapter.sync()
         self.assertEqual(json.loads(target.read_text())["Preferences"]["TabViewType"], 0)
 
-    def test_machine_state_stays_in_local_snapshot_and_survives_preset_import(self):
+    def test_machine_state_stays_private_and_existing_snapshot_is_preserved(self):
         machine = {
             "NoSyncRecordedVariables": {"hostname": "fixture-machine"},
             "NoSyncSavedWindowPositions": {"window": "{42, 84}"},
@@ -169,6 +167,11 @@ class ITermSyncTests(unittest.TestCase):
         profile = self.native["New Bookmarks"][0]
         profile.update({"Screen": 3, "Space": 7, "Window Frame": "{42, 84}"})
         native = deepcopy(self.native)
+        snapshot = self.state / "iterm/preferences.plist"
+        snapshot.parent.mkdir(parents=True)
+        snapshot.write_bytes(b"existing recovery data")
+        snapshot.chmod(0o600)
+        previous = (snapshot.read_bytes(), snapshot.stat())
         self.adapter.sync()
         exported = json.loads((self.shared / "settings.json").read_text())["Preferences"]
         self.assertTrue(set(machine).isdisjoint(exported))
@@ -178,9 +181,9 @@ class ITermSyncTests(unittest.TestCase):
         self.assertEqual(public_profile["Normal Font"], "Fixture 14")
         self.assertEqual(public_profile["Transparency"], 0.4)
         self.assertEqual(public_profile["Keyboard Map"]["shortcut"]["Text"], "profile-1")
-        snapshot = self.state / "iterm/preferences.plist"
-        self.assertEqual(plistlib.loads(snapshot.read_bytes()), native)
-        self.assertEqual(snapshot.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(snapshot.read_bytes(), previous[0])
+        self.assertEqual(snapshot.stat().st_mtime_ns, previous[1].st_mtime_ns)
+        self.assertEqual(snapshot.stat().st_mode, previous[1].st_mode)
         self.assertEqual(self.native, native)
         receiver = deepcopy(native)
         receiver["NoSyncRecordedVariables"] = {"hostname": "another-fixture"}
@@ -248,18 +251,25 @@ class ITermSyncTests(unittest.TestCase):
         self.assertFalse(self.adapter.DESTINATION.exists())
         self.assertFalse(self.state.exists())
 
-    def test_existing_generated_profile_migrates_without_reimport(self):
+    def test_generated_profile_does_not_skip_first_copy_without_marker(self):
         self.adapter.DESTINATION.parent.mkdir()
         self.adapter.DESTINATION.write_text('{"Profiles":[]}')
         with patch.object(self.adapter, "copy_settings") as copy:
             self.adapter.install()
-            copy.assert_not_called()
+            copy.assert_called_once_with()
         self.assertTrue((self.state / "iterm/installed").exists())
 
     def test_missing_native_profile_does_not_erase_saved_settings(self):
         self.native["New Bookmarks"] = []
         before = (self.shared / "settings.json").read_bytes()
-        with self.assertRaisesRegex(ValueError, "no native profile"):
+        raw = plistlib.dumps(self.native, fmt=plistlib.FMT_BINARY)
+        with (
+            patch.object(
+                self.adapter, "read_preferences", ITerm.read_preferences.__get__(self.adapter)
+            ),
+            patch("src.apps.iterm.subprocess.run", return_value=SimpleNamespace(stdout=raw)),
+            self.assertRaisesRegex(RuntimeError, "Open iTerm once"),
+        ):
             self.adapter.sync()
         self.assertEqual(before, (self.shared / "settings.json").read_bytes())
 

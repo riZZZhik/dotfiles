@@ -29,9 +29,7 @@ class ITerm(App):
         self.WATCH_PATHS = (self.PREFERENCES, self.DESTINATION.parent)
 
     def install(self, *, copy_settings: bool = True) -> None:
-        self.install_once(
-            self.copy_settings, configured=not copy_settings or self.DESTINATION.exists()
-        )
+        self.install_once(self.copy_settings, configured=not copy_settings)
 
     def read_preferences(self) -> tuple[dict, bytes]:
         raw = subprocess.run(
@@ -74,8 +72,6 @@ class ITerm(App):
     def sync(self) -> None:
         original, _ = self.read_preferences()
         profiles = original["New Bookmarks"]
-        if not profiles:
-            raise ValueError("iTerm has no native profile; keeping its exported settings.")
         known = {profile.get("Guid") for profile in profiles}
         for source in sorted(self.DESTINATION.parent.glob("*.json")):
             for profile in json.loads(source.read_text()).get("Profiles", []):
@@ -87,10 +83,6 @@ class ITerm(App):
             for index, profile in enumerate(profiles)
             if "Guid" in profile
         }
-        # The complete native snapshot stays local, including private commands and paths.
-        write_if_changed(
-            STATE / "iterm/preferences.plist", plistlib.dumps(original, fmt=plistlib.FMT_BINARY)
-        )
         portable = self.portable(original, guids)
         write_json_if_changed(self.SHARED / "settings.json", {"Preferences": portable})
 

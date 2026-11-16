@@ -5,7 +5,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 for argument in "$@"; do
   if [[ "$argument" == --help || "$argument" == -h ]]; then
     cat <<'USAGE'
-Usage: ./install [install|apply|update|sync|cleanup|link SOURCE [DESTINATION]|fork|detach]
+Usage: ./install [install|apply|update|sync|link SOURCE [DESTINATION]|fork|detach]
 
 Install configured stages, link dotfiles and apply settings.
 Install reconciles Python and libraries. Update upgrades packages and Sheldon plugins.
@@ -39,7 +39,7 @@ case "${1:-install}" in
     ;;
 esac
 
-python="$HOME/.local/bin/python3"
+python="$PWD/.venv/bin/python"
 if [[ ! -x "$python" ]] || ! "$python" -c 'import yaml, json5, tomlkit' >/dev/null 2>&1; then
   printf 'Installer runtime is missing. Run ./install first.\n' >&2
   exit 1

@@ -121,7 +121,7 @@ class AdoptSettingsTests(unittest.TestCase):
         self.assertFalse((self.root / "home").exists())
         cli.main(["install"], self.root)
         self.assertEqual(before, self.snapshot())
-        self.shell.assert_not_called()
+        self.shell.assert_called_once_with("cleanup")
         self.assertFalse((self.home / ".codex/AGENTS.md").exists())
         agent = plistlib.loads(Path(self.sync["agent"]).read_bytes())
         self.assertEqual(agent["WorkingDirectory"], str(self.root))
@@ -137,8 +137,7 @@ class AdoptSettingsTests(unittest.TestCase):
         self.assertTrue(saved["Personal Option"])
         self.assertEqual(saved["New Bookmarks"][0]["Normal Font"], "Own Font 18")
         self.assertNotIn("private-command", json.dumps(saved))
-        full = plistlib.loads((self.state / "iterm/preferences.plist").read_bytes())
-        self.assertEqual(full["New Bookmarks"][0]["Command"], "private-command")
+        self.assertFalse((self.state / "iterm/preferences.plist").exists())
         self.assertEqual(
             tomlkit.parse((self.root / "config/codex/config.toml").read_text())["model"],
             "own-model",
@@ -155,7 +154,7 @@ class AdoptSettingsTests(unittest.TestCase):
         self.inventory.unlink()
         self.codex.unlink()
         self.ready = False
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(FileNotFoundError):
             cli.main(["install"], self.root)
         self.assertTrue(Path(self.sync["agent"]).exists())
         self.launchctl.assert_called_with(
@@ -246,7 +245,7 @@ class AdoptSettingsTests(unittest.TestCase):
         iterm.sync.assert_called_once_with()
         codex.install.assert_not_called()
         codex.sync.assert_not_called()
-        self.shell.assert_not_called()
+        self.shell.assert_called_once_with("cleanup")
 
     def test_home_only_presets_skip_app_links_and_macos_actions(self):
         source = yaml.safe_load((SOURCE / "config/setup.yaml").read_text())

@@ -38,7 +38,6 @@ class DetachTests(unittest.TestCase):
         )
         for patcher in (
             patch.object(Path, "home", return_value=self.home),
-            patch.object(operation, "STATE", self.base / "state"),
             patch.object(
                 operation, "SYNC", {"agent": str(self.agent), "label": "com.dotfiles.sync"}
             ),
@@ -204,6 +203,20 @@ class DetachTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "unrelated LaunchAgent"):
             self.detach()
         self.run.assert_not_called()
+
+    def test_missing_plist_cannot_unload_a_service_with_unknown_ownership(self):
+        _, target = self.file_link()
+        self.agent.unlink()
+        with (
+            patch.object(
+                operation.subprocess, "run", return_value=SimpleNamespace(returncode=0)
+            ) as run,
+            self.assertRaisesRegex(RuntimeError, "Cannot verify sync ownership"),
+        ):
+            self.detach()
+        self.assertEqual(run.call_count, 1)
+        self.assertEqual(run.call_args.args[0][:2], ["launchctl", "print"])
+        self.assertTrue(target.is_symlink())
 
     def test_cli_dispatch_does_not_apply_or_sync(self):
         with (

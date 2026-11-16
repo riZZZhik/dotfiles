@@ -1,5 +1,6 @@
 """Exercise Linux selection and file lifecycle without changing the real home."""
 
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -35,6 +36,12 @@ class LinuxTests(unittest.TestCase):
         )
 
     def test_apply_preserves_existing_files_and_skips_mac_home_and_daemon(self):
+        root = self.base / "repo"
+        (root / "config/codex").mkdir(parents=True)
+        shutil.copy2(ROOT / "config/setup.yaml", root / "config/setup.yaml")
+        (root / "config/codex/AGENTS.md").write_text("# fixture\n")
+        (root / "home").mkdir()
+        (root / "home/.zshrc").write_text("# fixture shell\n")
         original = self.home / ".zshrc"
         original.write_text("original shell\n")
         with (
@@ -43,14 +50,14 @@ class LinuxTests(unittest.TestCase):
             patch.object(cli, "run_shell"),
             patch.object(linux, "set_zsh_default") as default_shell,
         ):
-            cli.apply(ROOT, config.load_catalog(ROOT))
-            backups = list(self.home.glob("dotfiles-backup-*/.zshrc"))
+            cli.apply(root, config.load_catalog(root))
+            backups = list((root / ".private/backups/links").glob("*/.zshrc"))
             self.assertEqual([p.read_text() for p in backups], ["original shell\n"])
             self.assertTrue(original.is_symlink())
             self.assertFalse((self.home / ".config/karabiner").exists())
             self.assertFalse((self.home / ".config/linearmouse").exists())
-            cli.apply(ROOT, config.load_catalog(ROOT))
-            self.assertEqual(backups, list(self.home.glob("dotfiles-backup-*/.zshrc")))
+            cli.apply(root, config.load_catalog(root))
+            self.assertEqual(backups, list((root / ".private/backups/links").glob("*/.zshrc")))
         self.assertTrue(default_shell.called)
         with patch.object(apps.subprocess, "run") as run:
             apps.install_agent(ROOT, ("codex",))
@@ -79,10 +86,10 @@ class LinuxTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli.main(["link", str(source), "escape/key"])
 
-    def test_detach_materializes_public_and_private_platform_links_without_launchctl(self):
+    def test_detach_materializes_owned_private_links_without_launchctl(self):
         public, private = self.base / "public", self.home / ".dotfiles_secret"
         (public / "home").mkdir(parents=True)
-        overlay = private / "home-platform/linux"
+        overlay = private / "generated"
         overlay.mkdir(parents=True)
         (overlay / ".gitconfig-platform").write_text("# local helper\n")
         target = self.home / ".gitconfig-platform"
@@ -90,7 +97,6 @@ class LinuxTests(unittest.TestCase):
         with (
             patch.object(Path, "home", return_value=self.home),
             patch.object(operation, "load_catalog", return_value=()),
-            patch.object(operation, "STATE", self.base / "state"),
             patch.object(operation.subprocess, "run") as run,
         ):
             operation.detach(public)
@@ -98,6 +104,24 @@ class LinuxTests(unittest.TestCase):
         run.assert_not_called()
         self.assertFalse(target.is_symlink())
         self.assertEqual(target.read_text(), "# local helper\n")
+
+    def test_managed_release_is_preserved_without_network_or_commands(self):
+        destination = self.home / ".local/bin/fzf"
+        destination.parent.mkdir(parents=True)
+        destination.write_text("installed executable\n")
+        state = self.home / ".local/state/dotfiles/packages/fzf.json"
+        state.parent.mkdir(parents=True)
+        state.write_text('{"version":"v1.0"}\n')
+        with (
+            patch.object(Path, "home", return_value=self.home),
+            patch.object(linux, "download") as download,
+            patch.object(linux.subprocess, "run") as run,
+        ):
+            linux.install_release("fzf")
+        download.assert_not_called()
+        run.assert_not_called()
+        self.assertEqual(destination.read_text(), "installed executable\n")
+        self.assertEqual(state.read_text(), '{"version":"v1.0"}\n')
 
     def test_release_failure_preserves_installed_executable(self):
         destination = self.home / ".local/bin/fzf"

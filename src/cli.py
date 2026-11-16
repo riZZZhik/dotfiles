@@ -34,46 +34,51 @@ def run_shell(name, *args, **kwargs):
     )
 
 
-def link(source, destination):
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    if destination.exists() and source.exists() and destination.samefile(source):
+def link(source, destination, *, root=ROOT):
+    if destination.resolve() == source.resolve():
         return
-    preserve(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.is_symlink():
+        destination.unlink()
+    else:
+        preserve(destination, root=root)
     destination.symlink_to(source, target_is_directory=source.is_dir())
 
 
-def preserve(destination):
-    if destination.exists() or destination.is_symlink():
-        backup = (
-            Path(tempfile.mkdtemp(prefix="dotfiles-backup-", dir=Path.home())) / destination.name
-        )
+def preserve(destination, *, root=ROOT):
+    if destination.exists():
+        directory = root / ".private/backups/links"
+        directory.mkdir(parents=True, exist_ok=True)
+        backup = Path(tempfile.mkdtemp(prefix="backup-", dir=directory)) / destination.name
         shutil.move(str(destination), backup)
         print(f"Preserved {destination} at {backup}")
 
 
-def link_home(source, destination, *, excluded=frozenset(), relative=Path()):
+def link_home(source, destination, *, root=ROOT, excluded=frozenset(), relative=Path()):
     if relative.as_posix() in excluded:
         return
     if not source.is_dir() or source.is_symlink():
-        link(source, destination)
+        link(source, destination, root=root)
         return
     if destination.is_symlink():
-        existing = destination.resolve()
-        preserve(destination)
-        destination.mkdir(parents=True)
-        if existing.is_dir():
-            link_home(existing, destination)
+        if destination.resolve() == source.resolve():
+            return
+        destination.unlink()
     elif destination.exists() and not destination.is_dir():
-        preserve(destination)
+        preserve(destination, root=root)
     destination.mkdir(parents=True, exist_ok=True)
     for entry in source.iterdir():
         link_home(
-            entry, destination / entry.name, excluded=excluded, relative=relative / entry.name
+            entry,
+            destination / entry.name,
+            root=root,
+            excluded=excluded,
+            relative=relative / entry.name,
         )
 
 
-def check_sources(root: Path, stages: tuple[Stage, ...]):
-    if "home" in collect_copy_settings(root) and not (root / "home").is_dir():
+def check_sources(root: Path, stages: tuple[Stage, ...], *, copies):
+    if "home" in copies and not (root / "home").is_dir():
         raise RuntimeError("Restore the repository home/ directory before applying dotfiles.")
     for stage in stages:
         for config in stage.configuration:
@@ -92,36 +97,32 @@ def apply(
         name = stage.id.removeprefix("setup-")
         if (name if name in COPY_NAMES else "home") in copies:
             preset_stages.append(stage)
-    check_sources(root, tuple(preset_stages))
+    check_sources(root, tuple(preset_stages), copies=copies)
     if "home" in copies:
         excluded = (
             frozenset({".config/karabiner", ".config/linearmouse"})
             if sys.platform == "linux"
             else frozenset()
         )
-        link_home(root / "home", Path.home(), excluded=excluded)
+        link_home(root / "home", Path.home(), root=root, excluded=excluded)
     for stage in stages:
         print(f"Stage: {stage.title}")
-        if command == "install" and stage.packages and sys.platform == "linux":
-            from .linux import install_packages
+        if command == "install" and stage.packages:
+            if sys.platform == "linux":
+                from .linux import install_packages
 
-            install_packages(stage.packages)
-        if command == "install" and stage.packages and sys.platform == "darwin":
-            selected = collect_packages((stage,))
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".Brewfile") as temporary:
-                temporary.write("\n".join(p.brew_line() for p in selected) + "\n")
-                temporary.flush()
-                run_shell("packages", command, temporary.name)
+                install_packages(stage.packages)
+            elif sys.platform == "darwin":
+                selected = collect_packages((stage,))
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".Brewfile") as temporary:
+                    temporary.write("\n".join(p.brew_line() for p in selected) + "\n")
+                    temporary.flush()
+                    run_shell("packages", command, temporary.name)
         for config in stage.configuration if stage in preset_stages else ():
             if not config.destination:
                 continue
             source, destination = root / config.source, Path.home() / config.destination
-            if config.mode == "seed":
-                if not destination.exists() and not destination.is_symlink():
-                    destination.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(source, destination)
-            else:
-                link(source, destination)
+            link(source, destination, root=root)
         for extra in stage.actions:
             scope = {
                 "shell-plugins": "home",
@@ -166,7 +167,7 @@ def main(argv=None, root=ROOT):
     parser = argparse.ArgumentParser(prog="./install", description=__doc__)
     parser.add_argument(
         "command",
-        choices=["install", "apply", "update", "sync", "cleanup", "link", "fork", "detach"],
+        choices=["install", "apply", "update", "sync", "link", "fork", "detach"],
         nargs="?",
         default="install",
     )
@@ -200,27 +201,13 @@ def main(argv=None, root=ROOT):
             # Reject a destination parent symlink escaping the user home.
             if not destination.parent.resolve().is_relative_to(home.resolve()):
                 parser.error("link destination must remain inside your home")
-        link_home(source, destination)
-        for entry in home.iterdir():
-            if (
-                entry.is_symlink()
-                and not entry.exists()
-                and entry.resolve().is_relative_to(source.parent)
-            ):
-                entry.unlink()
+        link_home(source, destination, root=root)
         print("Dotfiles linked.")
         return
     if args.source is not None or args.destination is not None:
         parser.error("source and destination are only valid with link")
     if command == "detach":
         detach(root)
-        return
-    if command == "cleanup":
-        if sys.platform == "linux":
-            subprocess.run(["bash", str(ROOT / "src/linux.sh"), "--cleanup"], check=True)
-        else:
-            run_shell("packages", "cleanup")
-        print("Package caches cleaned.")
         return
     if command == "update":
         run_shell("update")
@@ -238,6 +225,8 @@ def main(argv=None, root=ROOT):
         )
         return
     apply(root, stages, command=command)
+    if command == "install":
+        run_shell("cleanup")
     print("Dotfiles applied. Review changes, then stage, commit and push them yourself.")
 
 

@@ -1,145 +1,81 @@
 # riZZZhik's dotfiles
 
-Personal macOS and Ubuntu CLI setup, with shared public/private settings and optional macOS app exports.
+Personal macOS and Ubuntu/WSL setup with shell tools, app presets and settings sync.
 
-## Setup on macOS
-
-```sh
-git clone https://github.com/riZZZhik/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
-```
-
-Review `config/setup.yaml` before installing. Its `setup-*` stages select software
-and preset actions. `copy_settings` selects which presets to apply;
-`sync.apps` independently selects daemon adapters.
-App paths and privacy policies live under `settings.{codex,vscode,iterm}`.
-Python libraries are configured in `pyproject.toml` under `global`; keep `installer`.
-
-To use the supplied presets:
-
-```sh
-./install
-```
-
-Configure the two independent root fields in `config/setup.yaml`:
-
-```yaml
-copy_settings: []
-sync:
-  enabled: true
-  apps: [codex, vscode, iterm]
-```
-
-Then run `./install`. With `copy_settings: []`, supplied home links, app presets,
-macOS defaults and file associations are skipped on install, apply and update.
-Configured software, the installer Python runtime and libraries are still reconciled;
-remove unwanted `setup-*` stages first. You can delete `home/` and the preset directories
-`config/{codex,vscode,iterm2}/`. Keep the installer/runtime files and the operational
-app paths/privacy policies under `settings`.
-
-Exports are created from your apps without importing supplied presets. Codex first
-captures your current configuration, then retains its normal two-way synchronization.
-Select the presets you want to apply independently:
-
-```yaml
-copy_settings:
-  - home
-  - macos
-  - codex
-  - vscode
-  - iterm
-```
-
-Comment out entries to preserve those settings, or use `copy_settings: []` to skip
-all presets. `home` controls home links and shell plugins; `macos` controls Touch ID
-and macOS defaults; app entries control their presets, links and file associations.
-App presets are copied once during installation, independently of software stages.
-For example, copy only `vscode` while listing both `vscode` and `iterm` in `sync.apps`:
-iTerm exports its own preferences without importing the supplied ones.
-This works independently of `sync.enabled`; set that to `false` (or clear `sync.apps`)
-and run `./install apply` to unload this checkout's daemon. Disabled daemon sync does
-not export preferences. No command-line setting switches or machine-local mode file
-are used.
-
-If an app has not created its preferences yet, setup reports that export as pending
-and still registers the daemon. It retries on later app events or its regular interval;
-existing exports remain intact. Select only the apps you use in `sync.apps`.
-
-If Command Line Tools setup opens, finish it and rerun. Removing packages from
-configuration does not uninstall them.
-
-## Setup on Ubuntu / WSL2
-
-Installs CLI tools and shared shell/Codex settings, and sets zsh as the default
-login shell. Tested on Ubuntu 24.04; desktop apps and macOS settings are skipped.
-
-Keep the checkout in the Linux filesystem, under `~/`:
+## Setup
 
 ```sh
 git clone https://github.com/riZZZhik/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
+# Review config/setup.yaml before installing.
 ./install
-exec zsh -l
 ```
 
-Configure Linux packages through `apt` and `release` in `config/setup.yaml`.
-For private settings, clone into `~/.dotfiles_secret` and run its `./install`.
-Codex sync is manual (`./install sync`); no background sync is registered.
+- **macOS:** if Command Line Tools setup opens, finish it and rerun.
+- **Ubuntu/WSL:** keep the checkout in the Linux filesystem. Desktop apps and macOS
+  settings are skipped. Run `exec zsh -l` after installation. Codex sync is manual;
+  no background agent is registered.
+- **Private settings:** clone your private repository into `~/.dotfiles_secret`
+  and run its `./install`.
+
+Run `./install` once per checkout to create its `.venv`; other commands do not
+bootstrap the installer runtime. Successful install/update cleans package caches.
+Removing a package from configuration does not uninstall it.
+
+## Configuration
+
+Edit [config/setup.yaml](config/setup.yaml):
+
+| Field | Controls |
+| --- | --- |
+| `setup-*` | Software and setup actions. macOS uses `brew`, `cask`, `mas`; Ubuntu uses `apt`, `release`. |
+| `copy_settings` | Presets: `home`, `macos`, `codex`, `vscode`, `iterm`. Use `[]` to skip presets without disabling software installation or app sync. |
+| `sync.apps` | Apps to sync, independently of preset/software selections. Select only apps you use. |
+| `sync.enabled` | Enables exports, including manual sync, and the macOS background agent. |
+| `settings` | App paths, backup locations and privacy rules. |
+
+`home` presets include shell plugins; `macos` includes Touch ID and system
+preferences. App presets include their settings, links and file associations.
+To disable exports and unload this checkout's agent, set `sync.enabled: false`
+and run `./install apply`.
+
+Optional user Python libraries go in the `global` group in
+[pyproject.toml](pyproject.toml). A nonempty group sets up the version in
+`.python-version` as the user-default Python and installs those libraries outside
+`.venv`. Keep the `installer` group for installer dependencies.
 
 ## Commands
 
 | Command | Effect |
 | --- | --- |
-| `./install apply` | Relink presets when enabled; export app preferences and register sync. |
-| `./install update` | Update installed packages and Sheldon plugins. |
-| `./install sync` | Export VS Code/iTerm preferences; sync Codex settings. |
-| `./install cleanup` | Clear package caches. |
+| `./install` | Install selected software, apply presets and set up sync. |
+| `./install apply` | Relink enabled presets, sync settings and register/unload the macOS agent. |
+| `./install update` | Upgrade all Homebrew/apt packages and Sheldon plugins, then clean caches. Release-managed binaries are not upgraded. |
+| `./install sync` | Export VS Code/iTerm settings and sync Codex. |
+| `./install link SOURCE [DESTINATION]` | Link a directory tree, or a file with an explicit home-relative destination. |
+| `./install detach` | Disable the owned agent and replace managed home links with local copies. |
 | `./install fork` | Create a GitHub fork and switch `origin`; no push. |
-| `./install link SOURCE [DESTINATION]` | Link a directory into `~/`, or a file/directory to an explicit home-relative destination. |
-| `./install detach` | Stop sync and replace both repositories' home links with local copies. |
 
-## App settings
+## App settings and recovery
 
-With presets enabled, installation copies VS Code/iTerm settings once, with backups.
-Later runs export these apps to dotfiles; they do not change app preferences or
-install/remove extensions. Existing VS Code extension baselines and generated iTerm
-profiles identify previously configured installations without recopying preferences.
+- **Codex:** settings sync both ways. See [Codex configuration](config/codex/README.md)
+  for conflict handling and privacy exclusions.
+- **VS Code:** presets copy once, including missing extensions. Later syncs export
+  settings, keybindings and extensions without changing the app. Private settings
+  go to the configured private repository, or `~/.local/state/dotfiles/vscode/`.
+  Machine-specific keybindings stay in that local directory.
+- **iTerm:** open it once, then quit normally before the first preset copy. Later
+  syncs export portable preferences and profiles while it is running. Commands,
+  host bindings and machine-specific state are excluded. Existing recovery
+  snapshots are preserved; new full-state snapshots are not generated.
 
-For a fresh iTerm preset copy, open it once, then quit it normally and rerun installation.
-The exporter works with iTerm running, including its native custom-preferences mode.
-For optional VS Code layout restoration, use **Profiles: Import Profile** into **Default**
-and confirm **Replace**. The initial layout is saved at
-`.private/backups/vscode/initial-ui-state.code-profile`; no restoration gate is required.
+Review exported changes before committing. If an app export fails, fix that app
+and rerun sync; later apps are skipped until it succeeds. On macOS, install/apply
+still registers the agent for retries.
 
-VS Code exports settings, keybindings, installed extensions and selected UI layout.
-Repeated exports preserve unchanged files and modification times. Codex and iTerm
-also retain existing export formatting when preference values already match.
-Existing private overrides, credential-named fields, remote SSH/environment settings
-and home paths are excluded from public settings. They go to the configured private
-repository when available, otherwise `~/.local/state/dotfiles/vscode/settings.local.jsonc`.
-Machine-specific keybindings are saved alongside it as `keybindings.local.json`.
+Default backups for replaced files and initial app imports live under the checkout's
+ignored `.private/backups/`. Correct links are kept; other symlinks are replaced
+without copying their targets. Existing backups are preserved.
 
-VS Code exports retain comments, blank lines and entry order from the live JSONC
-files. Folding regions are kept around the entries present in each split. Private
-entries take their attached comments to the local files; comments containing known
-private values, credential markers or local paths are removed from public exports.
-An owner-only local history at `~/.local/state/dotfiles/vscode/comment-redactions.json`
-retains private identifiers for redaction after settings are deleted; it is never
-imported into apps or exported to Git. Invalid history stops export.
-Unattached document headers and footers are omitted from public splits. Invalid or
-duplicate-key input leaves existing exports intact. The daemon never edits the live
-files; the initial preset installation still merges settings into a new JSON file.
-
-Each iTerm export captures portable native preferences and all profiles, including
-dynamic profile definitions. It needs no preset template and captures new settings
-and deletions. Public profile references use portable IDs. Commands, host bindings,
-paths, arbitrary text macros and credentials stay local. `NoSync`/Cocoa state,
-saved window arrangements, display/Space assignments, version/migration metadata and
-custom AI endpoints are also excluded. The complete native state remains in the
-local snapshot at `~/.local/state/dotfiles/iterm/preferences.plist`. These private
-recovery files have owner-only permissions; they are separate from public Git exports.
-The original preset format remains supported for its initial settings copy.
-
-**Detachment:** contents, permissions and installed apps are preserved. Resolve
-reported broken links or live sockets and retry. Earlier copies remain; reruns
-are safe. Run detachment separately from installation, apply, update or sync.
+Run detach separately from sync or edits. Before deleting a checkout, check for
+remaining links that depend on it, including links outside managed home paths.

@@ -1,7 +1,6 @@
 """VS Code initialization is explicit and daemon exports never write to the app."""
 
 import json
-import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
@@ -27,8 +26,6 @@ class VSCodeSyncTests(unittest.TestCase):
             (self.shared / name).write_text("{}\n")
         (self.shared / "keybindings.json").write_text("[]\n")
         (self.shared / "extensions.txt").write_text("# Empty fixture.\n")
-        self.profile = self.shared / "ui-state.code-profile"
-        self.profile.write_text('{"name":"Dotfiles UI","globalState":"{}"}')
         self.state = self.root / "state"
         for target in ("src.apps.base.STATE", "src.apps.vscode.STATE"):
             mock = patch(target, self.state)
@@ -40,7 +37,6 @@ class VSCodeSyncTests(unittest.TestCase):
             "user": str(self.root / "user"),
             "extensions": str(self.root / "extensions.json"),
             "backups": str(self.root / "backups"),
-            "layout_keys": ["workbench.panel.alignment"],
             "cli": "fixture-code",
             "extension_timeout_seconds": 1,
         }
@@ -287,28 +283,7 @@ class VSCodeSyncTests(unittest.TestCase):
         self.adapter.sync()
         self.assertEqual(json5.loads(settings.read_text()), {"editor.fontSize": 16})
 
-    def test_equal_layout_preserves_nested_json_formatting(self):
-        storage = {"workbench.panel.alignment": "left"}
-        self.profile.write_text(
-            json.dumps(
-                {"globalState": json.dumps({"storage": storage}, indent=4), "name": "Dotfiles UI"}
-            )
-        )
-        before = (self.profile.read_bytes(), self.profile.stat().st_mtime_ns)
-        values = {
-            "__$__targetStorageMarker": json.dumps({"workbench.panel.alignment": 0}),
-            **storage,
-        }
-        self.adapter.export_ui_state(values, self.profile)
-        self.assertEqual(before, (self.profile.read_bytes(), self.profile.stat().st_mtime_ns))
-        values["workbench.panel.alignment"] = "right"
-        self.adapter.export_ui_state(values, self.profile)
-        self.assertEqual(
-            json.loads(json.loads(self.profile.read_text())["globalState"])["storage"],
-            {"workbench.panel.alignment": "right"},
-        )
-
-    def test_copy_once_retains_unrelated_extensions_and_backs_up_layout(self):
+    def test_copy_once_retains_unrelated_extensions_and_settings(self):
         (self.shared / "settings.jsonc").write_text('{"editor.fontSize":18}')
         self.adapter.PRIVATE.parent.mkdir()
         self.adapter.PRIVATE.write_text('{"company.setting":"private"}')
@@ -319,7 +294,6 @@ class VSCodeSyncTests(unittest.TestCase):
         local_bindings.write_text(
             '[{"key":"ctrl+k","command":"local.command","args":"${vscodeDir}"}]'
         )
-        layout = self.profile.read_bytes()
 
         def installed(*args, **kwargs):
             self.assertEqual(args[0][-2:], ["--install-extension", "new.extension"])
@@ -342,9 +316,6 @@ class VSCodeSyncTests(unittest.TestCase):
             json.loads((self.adapter.USER / "keybindings.json").read_text())[0]["args"],
             self.shared.as_uri(),
         )
-        self.assertEqual(
-            (self.adapter.BACKUPS / "initial-ui-state.code-profile").read_bytes(), layout
-        )
         (self.adapter.USER / "settings.json").write_text('{"editor.fontSize":22}')
         (self.shared / "settings.jsonc").write_text('{"editor.fontSize":10}')
         before = self.snapshot_app()
@@ -353,14 +324,14 @@ class VSCodeSyncTests(unittest.TestCase):
             run.assert_not_called()
         self.assertEqual(before, self.snapshot_app())
 
-    def test_existing_machine_is_marked_initialized_without_app_writes(self):
+    def test_legacy_baseline_does_not_skip_first_copy_without_marker(self):
         legacy = self.state / "vscode/extensions.json"
         legacy.parent.mkdir(parents=True)
         legacy.write_text("[]")
         before = self.snapshot_app()
         with patch.object(self.adapter, "copy_settings") as copy:
             self.adapter.install()
-            copy.assert_not_called()
+            copy.assert_called_once_with()
         self.assertEqual(before, self.snapshot_app())
         self.assertTrue((self.state / "vscode/installed").exists())
 
@@ -374,28 +345,6 @@ class VSCodeSyncTests(unittest.TestCase):
         with patch.object(self.adapter, "copy_settings") as copy:
             self.adapter.install()
             copy.assert_called_once()
-
-    def test_layout_export_works_without_restoration_or_settings_sync_gate(self):
-        database = self.adapter.USER / "globalStorage/state.vscdb"
-        database.parent.mkdir()
-        with sqlite3.connect(database) as connection:
-            connection.execute("CREATE TABLE ItemTable (key TEXT PRIMARY KEY, value TEXT)")
-            connection.executemany(
-                "INSERT INTO ItemTable VALUES (?, ?)",
-                [
-                    ("sync.enable", "true"),
-                    ("__$__targetStorageMarker", json.dumps({"workbench.panel.alignment": 0})),
-                    ("workbench.panel.alignment", "left"),
-                    ("extension.secret", "synthetic-private-value"),
-                ],
-            )
-        before = self.snapshot_app()
-        self.adapter.sync()
-        self.assertEqual(before, self.snapshot_app())
-        profile = json.loads(self.profile.read_text())
-        self.assertEqual(
-            json.loads(profile["globalState"])["storage"], {"workbench.panel.alignment": "left"}
-        )
 
     def test_watches_app_inputs_only(self):
         self.assertIn(self.adapter.USER, self.adapter.WATCH_PATHS)

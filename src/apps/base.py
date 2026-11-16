@@ -62,12 +62,12 @@ def write_json_if_changed(target: Path, values: Any) -> None:
 
 class App(ABC):
     NAME: str
+    WATCH_PATHS: tuple[Path, ...]
 
     def __init__(self):
         self.CONFIG = load(self.NAME)
         self.SHARED = path(self.CONFIG["shared"])
         self.BACKUPS = path(self.CONFIG["backups"])
-        self.WATCH_PATHS: tuple[Path, ...] = (self.SHARED,)
 
     @abstractmethod
     def sync(self) -> None:

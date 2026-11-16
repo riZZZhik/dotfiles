@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import fcntl
 import hashlib
 import os
 import plistlib
@@ -13,7 +12,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from .apps.base import STATE, SYNC
+from .apps.base import SYNC
 from .config import load_catalog, path
 
 
@@ -32,33 +31,27 @@ def links(root: Path, private: Path, home: Path) -> list[Path]:
     roots = (root.resolve(), private.resolve())
     found = set()
 
-    def visit(source, destination, scan=False):
+    def visit(destination, scan=False):
         if destination.is_symlink():
             if owned(destination, roots):
                 found.add(destination)
         elif destination.is_dir() and scan:
             for child in destination.iterdir():
-                visit(source / child.name, child, True)
+                visit(child, True)
 
     # Scan managed home subtrees, including generated files and orphaned links,
     # without traversing unrelated directories such as Library or Documents.
     for repository in roots:
         source = repository / "home"
-        platform_home = (
-            repository / "home-platform" / ("macos" if sys.platform == "darwin" else "linux")
-        )
-        if platform_home.is_dir():
-            for entry in platform_home.iterdir():
-                visit(entry, home / entry.name, entry.is_dir())
         names = {entry.name for entry in source.iterdir()} if source.is_dir() else set()
         names.update(entry.name for entry in home.iterdir() if entry.is_symlink())
         for name in names:
             entry = source / name
-            visit(entry, home / name, entry.is_dir() and not entry.is_symlink())
+            visit(home / name, entry.is_dir() and not entry.is_symlink())
     for stage in load_catalog(root):
         for configuration in stage.configuration:
             if configuration.destination:
-                visit(root / configuration.source, home / configuration.destination)
+                visit(home / configuration.destination)
     return sorted(found)
 
 
@@ -161,23 +154,21 @@ def detach(root: Path, private: Path | None = None) -> None:
     if errors:
         raise RuntimeError("Detach preflight failed; nothing changed:\n" + "\n".join(errors))
 
-    STATE.mkdir(parents=True, exist_ok=True)
-    with (STATE / "sync.lock").open("a") as lock:
-        # Let an in-flight sync finish before unloading it; reuse the sync owner's lock.
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        if (
-            sys.platform == "darwin"
-            and (agent.read_bytes() if agent.exists() else None) != original
-        ):
-            raise RuntimeError("LaunchAgent changed during preflight; retry.")
-        service = f"gui/{os.getuid()}/{SYNC['label']}"
-        if sys.platform == "darwin":
-            loaded = subprocess.run(
-                ["launchctl", "print", service], capture_output=True, check=False
-            )
-            if loaded.returncode == 0:
-                subprocess.run(["launchctl", "bootout", service], check=True)
-            agent.unlink(missing_ok=True)
-        for link in candidates:
-            replace_link(link, roots)
+    if (
+        sys.platform == "darwin"
+        and (agent.read_bytes() if agent.exists() else None) != original
+    ):
+        raise RuntimeError("LaunchAgent changed during preflight; retry.")
+    service = f"gui/{os.getuid()}/{SYNC['label']}"
+    if sys.platform == "darwin":
+        loaded = subprocess.run(
+            ["launchctl", "print", service], capture_output=True, check=False
+        )
+        if loaded.returncode == 0:
+            if original is None:
+                raise RuntimeError("Cannot verify sync ownership without its LaunchAgent plist.")
+            subprocess.run(["launchctl", "bootout", service], check=True)
+        agent.unlink(missing_ok=True)
+    for link in candidates:
+        replace_link(link, roots)
     print(f"Removed dotfiles sync automation; replaced {len(candidates)} links with local copies.")

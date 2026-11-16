@@ -158,7 +158,7 @@ settings:
   codex:
     shared: config/codex/config.toml
     destination: ~/.codex/config.toml
-    backups: ~/.local/state/dotfiles/codex/backups
+    backups: .private/backups/codex
     baseline: ~/.local/state/dotfiles/codex/baseline.toml
 
     # Each list is a TOML key path; * matches one key component.
@@ -192,21 +192,6 @@ settings:
     backups: .private/backups/vscode
     cli: /Applications/Visual Studio Code.app/Contents/Resources/app/bin/code
     extension_timeout_seconds: 600
-
-    layout_keys:
-      - Comments.hidden
-      - menu.hiddenCommands
-      - refactorPreview.hidden
-      - tabs-list-width-horizontal
-      - terminal.hidden
-      - terminal.integrated.tabs.showDetailed
-      - views.customizations
-      - workbench.activity.pinnedViewlets2
-      - workbench.activityBar.location
-      - workbench.auxiliarybar.pinnedPanels
-      - workbench.panel.alignment
-      - workbench.panel.pinnedPanels
-      - workbench.statusbar.hidden
 
     file_associations:
       - duti -s com.microsoft.VSCode public.plain-text all
